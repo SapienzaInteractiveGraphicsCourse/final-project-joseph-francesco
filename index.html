@@ -39,65 +39,13 @@
 	</head>
 	<body>
 
-		<script type="module">
-
-			import * as THREE from 'https://unpkg.com/three@0.119.1/build/three.module.js';
-			import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
-			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
-			import Yoshi from '/js/yoshi.js'
-
-			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setClearColor( 0x404040, 1 );
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.body.appendChild( renderer.domElement );
-			camera.position.z = -50;
-
-			var light = new THREE.AmbientLight( 0x2f2f1f , 2 );
-			scene.add( light );
-
-			var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-			directionalLight.position.set(0,1,0)
-			scene.add( directionalLight );
-
-			var orbit = new OrbitControls( camera, renderer.domElement );
-			orbit.enableZoom = false;
-
-			var yoshi;
-			var loader = new GLTFLoader();
-			loader.load( 'models/yoshi/scene.gltf', function ( object ) {
-				// yoshi = object.scene;
-				object.scene.position.y = -15;
-				object.scene.rotation.y += 180;
-				yoshi = new Yoshi(object.scene)
-				console.log( yoshi );
-				yoshi.jump().start();
-				// yoshi.run().start();
-				// yoshi.jump().start();
-
-				scene.add( yoshi.model );
-				animate();
-			}, undefined, function ( error ) {
-				console.error( error );
-			} );
-
-
-			function animate() {
-				requestAnimationFrame( animate );
-				//yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[54].rotation.x += 0.01
-				//yoshi.rotation.y += 0.01;
-				TWEEN.update();
-				renderer.render( scene, camera );
-			}
-
-		</script>
 
 
 		<div class="game-holder" id="gameHolder">
 			<div class="header">
-				<h1><span>the</span>Aviator</h1>
-				<h2>fly it to the end</h2>
+<!--				<span>scappa</span>-->
+				<h1>Yoshi</h1>
+				<h2>Corre forever</h2>
 				<div class="score" id="score">
 					<div class="score__content" id="level">
 						<div class="score__label">level</div>
@@ -123,12 +71,5 @@
 			<div class="message message--replay" id="replayMessage">Click to Replay</div>
 			<div class="message message--instructions" id="instructions">Grab the blue pills<span>avoid the red ones</span></div>
 		</div>
-		<!-- Demo links -->
-		<nav class="meta">
-			<a class="codrops-icon codrops-icon--prev" href="http://tympanus.net/Development/Interactive3DMallMap/" title="Previous Demo"><span>Previous Demo</span></a>
-			<a class="codrops-icon codrops-icon--drop" href="http://tympanus.net/codrops/?p=26501" title="Back to the article"><span>Back to the Codrops article</span></a>
-			<a class="demo-link" href="part1.html">Part 1</a>
-			<a class="demo-link" href="part2.html">Part 2</a>
-		</nav>
 	</body>
 </html>
