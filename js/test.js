@@ -1,6 +1,6 @@
 
 import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
-import Yoshi from "./yoshi";
+
 
 //COLORS
 var Colors = {
@@ -47,7 +47,7 @@ function resetGame(){
           levelLastUpdate:0,
           distanceForLevelUpdate:1000,
 
-          planeDefaultHeight:100,
+          planeDefaultHeight:70,
           planeAmpHeight:80,
           planeAmpWidth:75,
           planeMoveSensivity:0.005,
@@ -112,9 +112,6 @@ function createScene() {
 
   HEIGHT = window.innerHeight;
   WIDTH = window.innerWidth;
-
-  // yoshi2 = new Yoshi();
-  // console.log('the new yoshi ', yoshi2);
 
   scene = new THREE.Scene();
   aspectRatio = WIDTH / HEIGHT;
@@ -941,7 +938,8 @@ function removeEnergy(){
 function updatePlane(){
 
   game.planeSpeed = normalize(mousePos.x,-.5,.5,game.planeMinSpeed, game.planeMaxSpeed);
-  var targetY = normalize(mousePos.y,-.75,.75,game.planeDefaultHeight-game.planeAmpHeight, game.planeDefaultHeight+game.planeAmpHeight);
+  var targetY = 1;
+  // var targetY = normalize(mousePos.y,-.75,.75,game.planeDefaultHeight-game.planeAmpHeight, game.planeDefaultHeight+game.planeAmpHeight);
   var targetX = normalize(mousePos.x,-1,1,-game.planeAmpWidth*.7, -game.planeAmpWidth);
 
   game.planeCollisionDisplacementX += game.planeCollisionSpeedX;
@@ -960,6 +958,8 @@ function updatePlane(){
   camera.fov = normalize(mousePos.x,-1,1,40, 80);
   camera.updateProjectionMatrix ()
   camera.position.y += (airplane.position.y - camera.position.y)*deltaTime*game.cameraSensivity;
+  camera.position.y += 3;
+
 
   game.planeCollisionSpeedX += (0-game.planeCollisionSpeedX)*deltaTime * 0.03;
   game.planeCollisionDisplacementX += (0-game.planeCollisionDisplacementX)*deltaTime *0.01;
