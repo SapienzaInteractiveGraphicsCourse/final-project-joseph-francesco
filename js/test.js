@@ -1,6 +1,6 @@
 
 import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
-
+import Yoshi from '/js/yoshi.js'
 
 //COLORS
 var Colors = {
@@ -47,7 +47,7 @@ function resetGame(){
           levelLastUpdate:0,
           distanceForLevelUpdate:1000,
 
-          planeDefaultHeight:70,
+          planeDefaultHeight:100,
           planeAmpHeight:80,
           planeAmpWidth:75,
           planeMoveSensivity:0.005,
@@ -67,7 +67,7 @@ function resetGame(){
           seaLength:800,
           //seaRotationSpeed:0.006,
           wavesMinAmp : 5,
-          wavesMaxAmp : 20,
+          wavesMaxAmp : 7,
           wavesMinSpeed : 0.001,
           wavesMaxSpeed : 0.003,
 
@@ -99,7 +99,6 @@ var scene,
     renderer,
     container,
     controls;
-var yoshi2;
 
 //SCREEN & MOUSE VARIABLES
 
@@ -186,6 +185,23 @@ function handleTouchEnd(event){
     resetGame();
     hideReplay();
   }
+}
+
+
+function onDocumentKeyDown(event) {
+  var keyCode = event.which;
+  // if (keyCode == 32) {
+  //   yoshi.stop();
+  //   scene.add(yoshi);
+  // } else    if (keyCode == 87) {
+  //   yoshi.stop();
+  // } else if (keyCode == 83) {
+  //   yoshi.stop();
+  // } else if (keyCode == 65) {
+  //   yoshi.stop();
+  // } else if (keyCode == 68) {
+  //   yoshi.stop();
+  // }
 }
 
 // LIGHTS
@@ -775,7 +791,7 @@ var sea;
 var airplane;
 
 function createPlane(){
-  airplane = yoshi;
+  airplane = yoshi.model;
   // airplane = new AirPlane();
   // airplane.mesh.scale.set(.25,.25,.25);
   // airplane.mesh.position.y = game.planeDefaultHeight;
@@ -938,8 +954,8 @@ function removeEnergy(){
 function updatePlane(){
 
   game.planeSpeed = normalize(mousePos.x,-.5,.5,game.planeMinSpeed, game.planeMaxSpeed);
-  var targetY = 1;
-  // var targetY = normalize(mousePos.y,-.75,.75,game.planeDefaultHeight-game.planeAmpHeight, game.planeDefaultHeight+game.planeAmpHeight);
+  // var targetY =5;
+  var targetY = normalize(mousePos.y,-.75,.75,game.planeDefaultHeight-game.planeAmpHeight, game.planeDefaultHeight+game.planeAmpHeight);
   var targetX = normalize(mousePos.x,-1,1,-game.planeAmpWidth*.7, -game.planeAmpWidth);
 
   game.planeCollisionDisplacementX += game.planeCollisionSpeedX;
@@ -949,11 +965,12 @@ function updatePlane(){
   game.planeCollisionDisplacementY += game.planeCollisionSpeedY;
   targetY += game.planeCollisionDisplacementY;
 
-  airplane.position.y += (targetY-airplane.position.y)*deltaTime*game.planeMoveSensivity;
+  airplane.position.y += 30;
+  // airplane.position.y += (targetY-airplane.position.y)*deltaTime*game.planeMoveSensivity;
   airplane.position.x += (targetX-airplane.position.x)*deltaTime*game.planeMoveSensivity;
 
-  airplane.rotation.z = (targetY-airplane.position.y)*deltaTime*game.planeRotXSensivity;
-  airplane.rotation.x = (airplane.position.y-targetY)*deltaTime*game.planeRotZSensivity;
+  // airplane.rotation.z = (targetY-airplane.position.y)*deltaTime*game.planeRotXSensivity;
+  // airplane.rotation.x = (airplane.position.y-targetY)*deltaTime*game.planeRotZSensivity;
   var targetCameraZ = normalize(game.planeSpeed, game.planeMinSpeed, game.planeMaxSpeed, game.cameraNearPos, game.cameraFarPos);
   camera.fov = normalize(mousePos.x,-1,1,40, 80);
   camera.updateProjectionMatrix ()
@@ -993,78 +1010,19 @@ function init(event){
   resetGame();
   createScene();
 
-  // loader.load( 'models/yoshi/scene.gltf', function   (object) {
-  //   yoshi = object.scene;
-  //   yoshi.position.y = +12;
-  //   yoshi.position.z = -240;
-  //   yoshi.rotation.y += 20;
-  //   console.log( yoshi );
-  //   scene.add( yoshi );
-  //   playGame();
-  // }, undefined, function ( error ) {
-  //   console.error( error );
-  // } );
-
   loader.load( 'models/yoshi/scene.gltf', function ( object ) {
 
     // load model
-    yoshi = object.scene;
-    //   yoshi.position.y = +12;
-    //   yoshi.position.z = -240;
-      yoshi.rotation.y += 20;
-    yoshi.position.y = -15;
-    // yoshi.rotation.y += 180
+    // yoshi = object.scene;
+
+    yoshi = new Yoshi(object.scene)
+    console.log( yoshi );
+
+    object.scene.rotation.y += 20;
+    object.scene.position.y = -15;
+    yoshi.run().start();
     scene.add( yoshi );
-
-    // retrieve bones
-    var head = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[46].skeleton.bones[5];
-    var nose = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[7];
-    var mouth = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[8];
-    var L_arm = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[23];
-    var L_hand = L_arm.children[0].children[0].children[0];
-    var R_arm = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[37];
-    var R_hand = R_arm.children[0].children[0].children[0];
-    var L_hand = L_arm.children[0].children[0].children[0];
-    var L_leg = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[52];
-    var R_leg = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[56];
-    var tail = yoshi.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[60];
-
-    // position bones
-    L_arm.rotation.set( -4.0, 0.0, -1.5707960072844427 );
-    L_arm.children[0].rotation.set( 0.5, 0.0, 0.5);
-    L_arm.children[0].children[0].rotation.set( 0.0, 0.0, 0.6);
-    L_hand.rotation.set( 0.0, 2.0, 0.0 );
-    R_arm.rotation.set( -0.5, 0.0, -1.570795870291479 );
-    R_arm.children[0].rotation.set( 0.5, 0.0, 0.5);
-    R_arm.children[0].children[0].rotation.set( 0.0, 0.0, 0.6);
-    R_hand.rotation.set( 0.0, 2.0, 0.0 );
-
-    // define animations
-    var leg_tween1 = new TWEEN.Tween(L_leg.rotation).to({x: -4.2}, 200);
-    var leg_tween2 = new TWEEN.Tween(L_leg.rotation).to({x: -1.8}, 400);
-    var leg_tween3 = new TWEEN.Tween(L_leg.rotation).to({x: -3.14}, 200); //base
-    leg_tween1.chain(leg_tween2.chain(leg_tween3.chain(leg_tween1)));
-    leg_tween1.start();
-
-    var leg_tween4 = new TWEEN.Tween(R_leg.rotation).to({x: 1.5}, 200);
-    var leg_tween5 = new TWEEN.Tween(R_leg.rotation).to({x: -1.0}, 400);
-    var leg_tween6 = new TWEEN.Tween(R_leg.rotation).to({x: 0.0}, 200); //base
-    leg_tween4.chain(leg_tween5.chain(leg_tween6.chain(leg_tween4)));
-    leg_tween4.start();
-
-    var arm_tween1 = new TWEEN.Tween(L_arm.rotation).to({x: -2.5}, 200)
-    var arm_tween2 = new TWEEN.Tween(L_arm.rotation).to({x: -5.0}, 400)
-    var arm_tween3 = new TWEEN.Tween(L_arm.rotation).to({x: -4.0}, 200)
-    arm_tween1.chain(arm_tween2.chain(arm_tween3.chain(arm_tween1)));
-    arm_tween1.start();
-
-    var arm_tween4 = new TWEEN.Tween(R_arm.rotation).to({x: -1.5}, 200)
-    var arm_tween5 = new TWEEN.Tween(R_arm.rotation).to({x: 0.5}, 400)
-    var arm_tween6 = new TWEEN.Tween(R_arm.rotation).to({x: -0.5}, 200)
-    arm_tween4.chain(arm_tween5.chain(arm_tween6.chain(arm_tween4)));
-    arm_tween4.start();
-
-      playGame();
+    playGame();
 
   });
 
@@ -1080,7 +1038,6 @@ function playGame(){
   fieldLevel = document.getElementById("levelValue");
   levelCircle = document.getElementById("levelCircleStroke");
 
-
   createLights();
   createPlane();
   createSea();
@@ -1093,6 +1050,8 @@ function playGame(){
   document.addEventListener('touchmove', handleTouchMove, false);
   document.addEventListener('mouseup', handleMouseUp, false);
   document.addEventListener('touchend', handleTouchEnd, false);
+  document.addEventListener("keydown", onDocumentKeyDown, false);
+
 
   loop();
 }
