@@ -1,5 +1,6 @@
 
 import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from '/js/three.module.js';
 import Yoshi from '/js/yoshi.js'
 
 //COLORS
@@ -520,15 +521,18 @@ var Sea = function(){
                      speed:game.wavesMinSpeed + Math.random()*(game.wavesMaxSpeed - game.wavesMinSpeed)
                     });
   };
+  const material = new THREE.MeshBasicMaterial({
+    map: loader.load('../assets/grass.png'),
+  });
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.blue,
     transparent:true,
     opacity:.8,
     shading:THREE.FlatShading,
-
+    map: loader.load('../assets/grass.png'),
   });
 
-  this.mesh = new THREE.Mesh(geom, mat);
+  this.mesh = new THREE.Mesh(geom, material);
   this.mesh.name = "waves";
   this.mesh.receiveShadow = true;
 
