@@ -60,9 +60,8 @@ export default class Yoshi {
 
     keyboard () {
         document.addEventListener("keydown", (event) => {
-            var key = event.which
-            //console.log(key)
-            switch (key) {
+            console.log(event.keyCode)
+            switch (event.keyCode) {
                 case 82:
                     this.run()
                     break
@@ -151,9 +150,10 @@ export default class Yoshi {
         if (this.isRunning) {
 
             var jump_tween1 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y+15.0}, 500).easing(TWEEN.Easing.Quadratic.Out).delay(430)
-            var jump_tween2 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In).onComplete(() => {
-                this.isJumping = false
-            })
+            var jump_tween2 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
+                .onComplete(() => {
+                    this.isJumping = false
+                })
             jump_tween1.chain(jump_tween2)
             TWEEN.add(jump_tween1)
 
@@ -200,9 +200,10 @@ export default class Yoshi {
         var foot_tween3 = new TWEEN.Tween(this.L_foot.rotation).to({x: 0.2}, 200)
         var foot_tween4 = new TWEEN.Tween(this.R_foot.rotation).to({x: 0.2}, 200)
         var foot_tween5 = new TWEEN.Tween(this.L_foot.rotation).to({x: -0.6}, 200).delay(160)
-        var foot_tween6 = new TWEEN.Tween(this.R_foot.rotation).to({x: -0.6}, 200).delay(160).onComplete(() => {
-            this.isJumping = false;
-        })
+        var foot_tween6 = new TWEEN.Tween(this.R_foot.rotation).to({x: -0.6}, 200).delay(160)
+            .onComplete(() => {
+                this.isJumping = false;
+            })
         foot_tween1.chain(foot_tween3)
         foot_tween2.chain(foot_tween4)
         TWEEN.add(foot_tween1)
@@ -238,9 +239,10 @@ export default class Yoshi {
         var head_tween4 = new TWEEN.Tween(this.head.rotation).to({y: 0.0}, 200)
         var head_tween5 = new TWEEN.Tween(this.head.rotation).to({y: -0.2}, 200)
         var head_tween6 = new TWEEN.Tween(this.head.rotation).to({y: 0.2}, 400)
-        var head_tween7 = new TWEEN.Tween(this.head.rotation).to({y: 0.0}, 200).onComplete(() => {
-            this.pose()
-        })
+        var head_tween7 = new TWEEN.Tween(this.head.rotation).to({y: 0.0}, 200)
+            .onComplete(() => {
+                this.pose()
+            })
         head_tween1.chain(head_tween2.chain(head_tween3.chain(head_tween4.chain(head_tween5.chain(head_tween6.chain(head_tween7))))))
         TWEEN.add(head_tween1)
 
