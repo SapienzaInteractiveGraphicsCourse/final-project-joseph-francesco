@@ -508,75 +508,95 @@ var Sea = function(){
   geom.mergeVertices();
   var l = geom.vertices.length;
 
-  this.waves = [];
+  var texture = THREE.ImageUtils.loadTexture( "https://threejsfundamentals.org/threejs/resources/images/wall.jpg" );
 
-  for (var i=0;i<l;i++){
-    var v = geom.vertices[i];
-    //v.y = Math.random()*30;
-    this.waves.push({y:v.y,
-                     x:v.x,
-                     z:v.z,
-                     ang:Math.random()*Math.PI*2,
-                     amp:game.wavesMinAmp + Math.random()*(game.wavesMaxAmp-game.wavesMinAmp),
-                     speed:game.wavesMinSpeed + Math.random()*(game.wavesMaxSpeed - game.wavesMinSpeed)
-                    });
-  };
-  const material = new THREE.MeshBasicMaterial({
-    map: loader.load('../assets/grass.png'),
-  });
-  var mat = new THREE.MeshPhongMaterial({
-    color:Colors.blue,
-    transparent:true,
-    opacity:.8,
-    shading:THREE.FlatShading,
-    map: loader.load('../assets/grass.png'),
-  });
+  //texture repeat and wrap properties http://threejs.org/docs/#Reference/Textures/Texture
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 3, 3 );
 
-  this.mesh = new THREE.Mesh(geom, material);
-  this.mesh.name = "waves";
-  this.mesh.receiveShadow = true;
+this.waves = [];
+
+for (var i=0;i<l;i++){
+var v = geom.vertices[i];
+//v.y = Math.random()*30;
+this.waves.push({y:v.y,
+           x:v.x,
+           z:v.z,
+           ang:Math.random()*Math.PI*2,
+           amp:game.wavesMinAmp + Math.random()*(game.wavesMaxAmp-game.wavesMinAmp),
+           speed:game.wavesMinSpeed + Math.random()*(game.wavesMaxSpeed - game.wavesMinSpeed),
+           map: texture
+          });
+};
+const loaderText = new THREE.TextureLoader();
+const material = new THREE.MeshBasicMaterial({
+map: loaderText.load('../assets/grass.png'),
+});
+var mat = new THREE.MeshPhongMaterial({
+color:Colors.blue,
+// transparent:true,
+opacity:.8,
+shading:THREE.FlatShading,
+map: texture,
+});
+
+this.mesh = new THREE.Mesh(geom, material);
+this.mesh.name = "waves";
+this.mesh.receiveShadow = true;
+
+
+const geometry = new THREE.BoxGeometry(50, 50, 50);
+const loader3 = new THREE.TextureLoader();
+
+const material2 = new THREE.MeshBasicMaterial({
+map: loader3.load('../assets/grass.png'),
+// map: loader3.load('https://threejsfundamentals.org/threejs/resources/images/wall.jpg'),
+});
+const cube = new THREE.Mesh(geometry, material2);
+scene.add(cube);
 
 }
 
 Sea.prototype.moveWaves = function (){
-  var verts = this.mesh.geometry.vertices;
-  var l = verts.length;
-  for (var i=0; i<l; i++){
-    var v = verts[i];
-    var vprops = this.waves[i];
-    v.x =  vprops.x + Math.cos(vprops.ang)*vprops.amp;
-    v.y = vprops.y + Math.sin(vprops.ang)*vprops.amp;
-    vprops.ang += vprops.speed*deltaTime;
-    this.mesh.geometry.verticesNeedUpdate=true;
-  }
+var verts = this.mesh.geometry.vertices;
+var l = verts.length;
+for (var i=0; i<l; i++){
+var v = verts[i];
+var vprops = this.waves[i];
+v.x =  vprops.x + Math.cos(vprops.ang)*vprops.amp;
+v.y = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+vprops.ang += vprops.speed*deltaTime;
+this.mesh.geometry.verticesNeedUpdate=true;
+}
 }
 
 var Cloud = function(){
-  this.mesh = new THREE.Object3D();
-  this.mesh.name = "cloud";
-  var geom = new THREE.CubeGeometry(20,20,20);
-  var mat = new THREE.MeshPhongMaterial({
-    color:Colors.white,
+this.mesh = new THREE.Object3D();
+this.mesh.name = "cloud";
+var geom = new THREE.CubeGeometry(20,20,20);
+var mat = new THREE.MeshPhongMaterial({
+color:Colors.white,
 
-  });
+});
 
-  //*
-  var nBlocs = 3+Math.floor(Math.random()*3);
-  for (var i=0; i<nBlocs; i++ ){
-    var m = new THREE.Mesh(geom.clone(), mat);
-    m.position.x = i*15;
-    m.position.y = Math.random()*10;
-    m.position.z = Math.random()*10;
-    m.rotation.z = Math.random()*Math.PI*2;
-    m.rotation.y = Math.random()*Math.PI*2;
-    var s = .1 + Math.random()*.9;
-    m.scale.set(s,s,s);
-    this.mesh.add(m);
-    m.castShadow = true;
-    m.receiveShadow = true;
+//*
+var nBlocs = 3+Math.floor(Math.random()*3);
+for (var i=0; i<nBlocs; i++ ){
+var m = new THREE.Mesh(geom.clone(), mat);
+m.position.x = i*15;
+m.position.y = Math.random()*10;
+m.position.z = Math.random()*10;
+m.rotation.z = Math.random()*Math.PI*2;
+m.rotation.y = Math.random()*Math.PI*2;
+var s = .1 + Math.random()*.9;
+m.scale.set(s,s,s);
+this.mesh.add(m);
+m.castShadow = true;
+m.receiveShadow = true;
 
-  }
-  //*/
+}
+//*/
 }
 
 Cloud.prototype.rotate = function(){
@@ -919,8 +939,6 @@ function loop(){
 function updateDistance(){
   game.distance += game.speed*deltaTime*game.ratioSpeedDistance;
   fieldDistance.innerHTML = Math.floor(game.distance);
-  var d = 502*(1-(game.distance%game.distanceForLevelUpdate)/game.distanceForLevelUpdate);
-  levelCircle.setAttribute("stroke-dashoffset", d);
 
 }
 
@@ -929,18 +947,21 @@ var blinkEnergy=false;
 function updateEnergy(){
   game.energy -= game.speed*deltaTime*game.ratioSpeedEnergy;
   game.energy = Math.max(0, game.energy);
-  energyBar.style.right = (100-game.energy)+"%";
-  energyBar.style.backgroundColor = (game.energy<50)? "#f25346" : "#68c3c0";
 
-  if (game.energy<30){
-    energyBar.style.animationName = "blinking";
-  }else{
-    energyBar.style.animationName = "none";
-  }
+  energyBar.innerHTML = Math.floor(game.energy);
 
-  if (game.energy <1){
-    game.status = "gameover";
-  }
+  // energyBar.style.right = (100-game.energy)+"%";
+  // energyBar.style.backgroundColor = (game.energy<50)? "#f25346" : "#68c3c0";
+
+  // if (game.energy<30){
+  //   energyBar.style.animationName = "blinking";
+  // }else{
+  //   energyBar.style.animationName = "none";
+  // }
+  //
+  // if (game.energy <1){
+  //   game.status = "gameover";
+  // }
 }
 
 function addEnergy(){
@@ -1007,7 +1028,7 @@ function normalize(v,vmin,vmax,tmin, tmax){
   return tv;
 }
 
-var fieldDistance, energyBar, replayMessage, fieldLevel, levelCircle;
+var fieldDistance, energyBar, replayMessage, fieldLevel;
 
 function init(event){
 
@@ -1040,7 +1061,6 @@ function playGame(){
   energyBar = document.getElementById("energyBar");
   replayMessage = document.getElementById("replayMessage");
   fieldLevel = document.getElementById("levelValue");
-  levelCircle = document.getElementById("levelCircleStroke");
 
   createLights();
   createPlane();

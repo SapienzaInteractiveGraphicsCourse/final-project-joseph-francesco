@@ -28,7 +28,7 @@
     line-height: 1;
     margin: 0;
     letter-spacing: -0.025em;
-    color: #d1b790;
+    color: black;
 }
 
 .header h1 span {
@@ -69,19 +69,20 @@
 }
 
 .score__label {
+    font-family: "Comic Sans MS";
     font-size: 9px;
     position: relative;
     margin: 0 0 0.5em 0;
     text-align: center;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #d1b790;
+    color: black;
 }
 
 .score__value {
     font-family: 'Playfair Display';
     font-weight: bold;
-    color: #d1b790;
+    color: black;
 }
 
 .score__value--level {
@@ -142,20 +143,20 @@
     display: none;
     text-indent: 0.5em;
     letter-spacing: 0.5em;
-    color: #d1b790;
+    color: black;
 }
 
 .message--instructions {
-    font-family: 'Playfair Display';
+    font-family: "Comic Sans MS";
     font-size: 0.85em;
     bottom: 8vh;
     letter-spacing: 0.2em;
-    color: #68c3c0;
+    color: black;
 }
 
 .message--instructions span {
     display: block;
-    color: #d6483b;
+    color: black;
     white-space: nowrap;
 }
 
