@@ -13,13 +13,13 @@
 		<script type="module">
 
 			import * as THREE from 'https://unpkg.com/three@0.119.1/build/three.module.js';
-			import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
-			import Coin from '/js/models/Coin.js'
-			import Egg from '/js/models/Egg.js'
-			import Mashroom from '/js/models/Mashroom.js'
-			import Star from '/js/models/Star.js'
+			import Coin from '/js/models/coin.js'
+			import Egg from '/js/models/egg.js'
+			import Mashroom from '/js/models/mashroom.js'
+			import Star from '/js/models/star.js'
+			import Goomba from '/js/models/goomba.js'
 
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -48,6 +48,7 @@
 			//var egg = new Egg(scene)
 			//var mushroom = new Mashroom(scene)
 			//var star = new Star(scene)
+			//var goomba = new Goomba(scene)
 
 			document.addEventListener("keydown", (event) => {
 				console.log(event.keyCode)
