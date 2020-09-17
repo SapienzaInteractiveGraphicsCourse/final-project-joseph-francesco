@@ -4,7 +4,7 @@ export default class Yoshi {
     constructor() {
         this.isJumping = false;
         this.isRunning = false;
-        this.isLosing = false;
+        this.isCrying = false;
     }
 
     async load() {
@@ -71,7 +71,7 @@ export default class Yoshi {
                     break
 
                 case 76:
-                    this.lose()
+                    this.cry()
                     break
 
                 default:
@@ -81,7 +81,7 @@ export default class Yoshi {
     }
 
     run() {
-        if (this.isJumping || this.isLosing) return
+        if (this.isJumping || this.isCrying) return
         if (this.isRunning) {
             this.stop()
             this.pose()
@@ -143,7 +143,7 @@ export default class Yoshi {
     }
 
     jump() {
-        if (this.isJumping || this.isLosing) return
+        if (this.isJumping || this.isCrying) return
         
         this.isJumping = true
 
@@ -229,9 +229,9 @@ export default class Yoshi {
         return
     }
 
-    lose() {
-        if (this.isLosing || this.isJumping) return
-        this.isLosing = true
+    cry() {
+        if (this.isCrying || this.isJumping) return
+        this.isCrying = true
         this.stop()
         this.pose()
 
@@ -244,7 +244,7 @@ export default class Yoshi {
         var head_tween7 = new TWEEN.Tween(this.head.rotation).to({y: 0.0}, 200)
             .onComplete(() => {
                 this.pose()
-                this.isLosing = false
+                this.isCrying = false
             })
         head_tween1.chain(head_tween2.chain(head_tween3.chain(head_tween4.chain(head_tween5.chain(head_tween6.chain(head_tween7))))))
         TWEEN.add(head_tween1)
