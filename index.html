@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico"/>
 		<meta charset="utf-8">
 		<title>IG Project</title>
 		<style>
@@ -9,10 +10,10 @@
 		</style>
 	</head>
 	<body>
+		<script type="text/javascript" src="js/three.min.js"></script>
 		<script src="js/tween.umd.js"></script>
 		<script type="module">
-
-			import * as THREE from 'https://unpkg.com/three@0.119.1/build/three.module.js';
+		
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
 			import Coin from '/js/models/coin.js'
@@ -28,6 +29,12 @@
 			renderer.setClearColor(0x404040, 1);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			document.body.appendChild(renderer.domElement);
+
+			//Load background texture
+			var loader = new THREE.TextureLoader();
+			loader.load('/assets/background.jpeg', function(texture) {
+            	scene.background = texture;  
+            });
 			
 			var light = new THREE.AmbientLight(0x2f2f1f , 2);
 			scene.add(light);
@@ -38,6 +45,8 @@
 
 			var orbit = new OrbitControls(camera, renderer.domElement);
 			orbit.enableZoom = false;
+			orbit.autoRotate = true;
+			orbit.autoRotateSpeed = 6.0;
 
 			var yoshi = new Yoshi();
 			yoshi.load().then((model) => {
@@ -51,7 +60,6 @@
 			//var goomba = new Goomba(scene)
 
 			document.addEventListener("keydown", (event) => {
-				console.log(event.keyCode)
 				switch (event.keyCode) {
 					case 67: // key 'C'
 						//coin.catch()
@@ -70,9 +78,16 @@
 			function animate() {
 				requestAnimationFrame(animate);
 				TWEEN.update();
+				orbit.update();
 				renderer.render(scene, camera);
 			}
-			
 		</script>
+
+		<div style="left: 30px; top: 30px; padding-left: 10px; padding-right: 10px; position: absolute; font-size: 24px; background-color: black; font-family: 'Courier New', Courier, monospace;">
+			<p style="color:white;"><b style="color:darkgreen;">R</b> to start/stop running</p>
+			<p style="color:white;"><b style="color:darkgreen;">Space</b> to jump</p>
+			<p style="color:white;"><b style="color:darkgreen;">L</b> to lose</p>
+			<p style="color:white;"><b style="color:red;">Enter</b> to start the game</p>
+		</div>
 	</body>
 </html>

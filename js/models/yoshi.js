@@ -4,6 +4,7 @@ export default class Yoshi {
     constructor() {
         this.isJumping = false;
         this.isRunning = false;
+        this.isLosing = false;
     }
 
     async load() {
@@ -60,7 +61,6 @@ export default class Yoshi {
 
     keyboard () {
         document.addEventListener("keydown", (event) => {
-            console.log(event.keyCode)
             switch (event.keyCode) {
                 case 82:
                     this.run()
@@ -81,7 +81,7 @@ export default class Yoshi {
     }
 
     run() {
-        if (this.isJumping) return
+        if (this.isJumping || this.isLosing) return
         if (this.isRunning) {
             this.stop()
             this.pose()
@@ -143,7 +143,7 @@ export default class Yoshi {
     }
 
     jump() {
-        if (this.isJumping) return
+        if (this.isJumping || this.isLosing) return
         
         this.isJumping = true
 
@@ -230,6 +230,8 @@ export default class Yoshi {
     }
 
     lose() {
+        if (this.isLosing || this.isJumping) return
+        this.isLosing = true
         this.stop()
         this.pose()
 
@@ -242,6 +244,7 @@ export default class Yoshi {
         var head_tween7 = new TWEEN.Tween(this.head.rotation).to({y: 0.0}, 200)
             .onComplete(() => {
                 this.pose()
+                this.isLosing = false
             })
         head_tween1.chain(head_tween2.chain(head_tween3.chain(head_tween4.chain(head_tween5.chain(head_tween6.chain(head_tween7))))))
         TWEEN.add(head_tween1)
