@@ -1,3 +1,5 @@
+import {Coin, Egg, Mushroom, Star, Goomba} from '/js/models/characters.js'
+
 export default class Game {
 
     constructor(scene, camera, renderer) {
@@ -11,6 +13,10 @@ export default class Game {
     async initScene() {
         this.renderer.setClearColor(Colors.blue, 1);
         this.scene.background = null
+        document.getElementById('instructions').style.display = 'none'
+        document.getElementById('level').style.visibility = 'visible'
+        document.getElementById('dist').style.visibility = 'visible'
+        document.getElementById('energy').style.visibility = 'visible'
         this.initCamera()
         this.world()
         this.objectGenerator()
@@ -35,7 +41,7 @@ export default class Game {
             var geometry = new THREE.CylinderGeometry(this.radius, this.radius, 800, 64)
             var material = new THREE.MeshBasicMaterial({map: texture})
             var sphere = new THREE.Mesh(geometry, material);
-            sphere.position.y = -610
+            sphere.position.y = -607
             sphere.position.x = -100
             sphere.rotation.x = 90*Math.PI/180
             this.scene.add(sphere)

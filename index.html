@@ -15,17 +15,12 @@
 		</style>
 	</head>
 	<body>
-		<script type="text/javascript" src="js/three.min.js"/></script>
-		<script src="js/tween.umd.js"/></script>
+		<script type="text/javascript" src="js/three.min.js"></script>
+		<script src="js/tween.umd.js"></script>
 		<script type="module">
 		
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
-			import Coin from '/js/models/coin.js'
-			import Egg from '/js/models/egg.js'
-			import Mashroom from '/js/models/mashroom.js'
-			import Star from '/js/models/star.js'
-			import Goomba from '/js/models/goomba.js'
 			import Game from '/js/game.js'
 
 			var scene = new THREE.Scene();
@@ -61,14 +56,12 @@
 			document.addEventListener("keydown", (event) => {
 				switch (event.key) {
 					case 'Enter':
-						document.getElementById('instructions').style.display = 'none'
-						document.getElementById('level').style.visibility = 'visible'
-						document.getElementById('dist').style.visibility = 'visible'
-						document.getElementById('energy').style.visibility = 'visible'
-						yoshi.game()
 						new Game(scene, camera, renderer)
+						yoshi.game()
 						break
 
+					case 'p':
+						console.log(TWEEN.getAll())
 					default:
 						break
 				}
@@ -78,9 +71,10 @@
 
 			function animate() {
 				requestAnimationFrame(animate);
-				TWEEN.update();
 				orbit.update();
+				yoshi.update()
 				renderer.render(scene, camera);
+				TWEEN.update();
 			}
 		</script>
 
