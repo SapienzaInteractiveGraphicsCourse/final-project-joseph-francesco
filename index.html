@@ -19,83 +19,7 @@
 
 	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 
-	<script type="module">
 
-		import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
-		import Yoshi from '/js/models/yoshi.js'
-		import Coin from '/js/models/coin.js'
-		import Egg from '/js/models/egg.js'
-		import Mashroom from '/js/models/mashroom.js'
-		import Star from '/js/models/star.js'
-		import Goomba from '/js/models/goomba.js'
-
-		var scene = new THREE.Scene();
-		var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-		camera.position.z = -50;
-		var renderer = new THREE.WebGLRenderer();
-		renderer.setClearColor(0x404040, 1);
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		document.body.appendChild(renderer.domElement);
-
-		//Load background texture
-		var loader = new THREE.TextureLoader();
-		loader.load('/assets/background.jpeg', function(texture) {
-			scene.background = texture;
-		});
-
-		var light = new THREE.AmbientLight(0x2f2f1f , 2);
-		scene.add(light);
-
-		var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-		directionalLight.position.set(0, 1, 0)
-		scene.add(directionalLight);
-
-		var orbit = new OrbitControls(camera, renderer.domElement);
-		orbit.enableZoom = false;
-		orbit.autoRotate = true;
-		orbit.autoRotateSpeed = 6.0;
-
-		var yoshi = new Yoshi();
-		yoshi.load().then((model) => {
-			scene.add(model);
-		});
-
-		//var coin = new Coin(scene)
-		//var egg = new Egg(scene)
-		//var mushroom = new Mashroom(scene)
-		//var star = new Star(scene)
-		//var goomba = new Goomba(scene)
-
-		document.addEventListener("keydown", (event) => {
-			switch (event.keyCode) {
-				case 67: // key 'C'
-					//coin.catch()
-					//egg.catch()
-					//mushroom.catch()
-					//star.catch()
-					break
-
-				default:
-					break
-			}
-		}, false)
-
-		animate();
-
-		function animate() {
-			requestAnimationFrame(animate);
-			TWEEN.update();
-			orbit.update();
-			renderer.render(scene, camera);
-		}
-	</script>
-
-	<div style="left: 30px; top: 30px; padding-left: 10px; padding-right: 10px; position: absolute; font-size: 24px; background-color: black; font-family: 'Courier New', Courier, monospace;">
-		<p style="color:white;"><b style="color:darkgreen;">R</b> to start/stop running</p>
-		<p style="color:white;"><b style="color:darkgreen;">Space</b> to jump</p>
-		<p style="color:white;"><b style="color:darkgreen;">L</b> to cry</p>
-		<p style="color:white;"><b style="color:red;">Enter</b> to start the game</p>
-	</div>
 
 
 	<title>IG Project</title>
@@ -106,7 +30,83 @@
 </head>
 <body>
 
+<script type="module">
 
+	import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
+	import Yoshi from '/js/models/yoshi.js'
+	import Coin from '/js/models/coin.js'
+	import Egg from '/js/models/egg.js'
+	import Mashroom from '/js/models/mashroom.js'
+	import Star from '/js/models/star.js'
+	import Goomba from '/js/models/goomba.js'
+
+	var scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+	camera.position.z = -50;
+	var renderer = new THREE.WebGLRenderer();
+	renderer.setClearColor(0x404040, 1);
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(renderer.domElement);
+
+	//Load background texture
+	var loader = new THREE.TextureLoader();
+	loader.load('/assets/background.jpeg', function(texture) {
+		scene.background = texture;
+	});
+
+	var light = new THREE.AmbientLight(0x2f2f1f , 2);
+	scene.add(light);
+
+	var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+	directionalLight.position.set(0, 1, 0)
+	scene.add(directionalLight);
+
+	var orbit = new OrbitControls(camera, renderer.domElement);
+	orbit.enableZoom = false;
+	orbit.autoRotate = true;
+	orbit.autoRotateSpeed = 6.0;
+
+	var yoshi = new Yoshi();
+	yoshi.load().then((model) => {
+		scene.add(model);
+	});
+
+	//var coin = new Coin(scene)
+	//var egg = new Egg(scene)
+	//var mushroom = new Mashroom(scene)
+	//var star = new Star(scene)
+	//var goomba = new Goomba(scene)
+
+	document.addEventListener("keydown", (event) => {
+		switch (event.keyCode) {
+			case 67: // key 'C'
+				//coin.catch()
+				//egg.catch()
+				//mushroom.catch()
+				//star.catch()
+				break
+
+			default:
+				break
+		}
+	}, false)
+
+	animate();
+
+	function animate() {
+		requestAnimationFrame(animate);
+		TWEEN.update();
+		orbit.update();
+		renderer.render(scene, camera);
+	}
+</script>
+
+<div style="left: 30px; top: 30px; padding-left: 10px; padding-right: 10px; position: absolute; font-size: 24px; background-color: black; font-family: 'Courier New', Courier, monospace;">
+	<p style="color:white;"><b style="color:darkgreen;">R</b> to start/stop running</p>
+	<p style="color:white;"><b style="color:darkgreen;">Space</b> to jump</p>
+	<p style="color:white;"><b style="color:darkgreen;">L</b> to cry</p>
+	<p style="color:white;"><b style="color:red;">Enter</b> to start the game</p>
+</div>
 
 <div class="game-holder" id="gameHolder">
 	<div class="header">
