@@ -5,6 +5,7 @@ export default class Yoshi {
         this.isJumping = false;
         this.isRunning = false;
         this.isCrying = false;
+        this.isPlaying = false;
     }
 
     async load() {
@@ -21,7 +22,7 @@ export default class Yoshi {
         this.bones(model);
         // position bones
         this.body.position.y = -15
-        this.body.rotation.y += 180
+        this.body.rotation.y = 240*Math.PI/180
         this.spine.rotation.x = 0.0
         this.head.position.set(0, 0.37, 0)
         this.head.rotation.x = 0.1
@@ -34,6 +35,16 @@ export default class Yoshi {
         this.R_arm.children[0].rotation.set(0.5, 0.0, 0.5)
         this.R_arm.children[0].children[0].rotation.set(0.0, 0.0, 0.6)
         this.R_hand.rotation.set(0.0, 2.0, 0.0)
+        
+        this.right_pressed = false
+        this.left_pressed = false
+        this.up_pressed = false
+        this.down_pressed = false
+        this.right_bound = -60
+        this.left_bound = 60
+        this.up_bound = -60
+        this.down_bound = 60
+        
         this.keyboard();
     }
 
@@ -61,27 +72,93 @@ export default class Yoshi {
 
     keyboard () {
         document.addEventListener("keydown", (event) => {
-            switch (event.keyCode) {
-                case 82:
+            switch (event.key) {
+                case 'r' || 'R': 
                     this.run()
                     break
 
-                case 32:
+                case ' ':
                     this.jump()
                     break
 
-                case 76:
-                    this.cry()
+                case 'ArrowRight':
+                    this.right_pressed = true
+                    if (this.isPlaying && this.body.position.z > this.right_bound){
+                        if (this.up_pressed && this.body.position.x > this.up_bound)
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z-5, x: this.body.position.x-5}, 130).start()
+                        else if (this.down_pressed && this.body.position.x < this.down_bound)
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z-5, x: this.body.position.x+5}, 130).start()
+                        else
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z-5}, 130).start()
+                    }
+                    break
+                
+                case 'ArrowLeft':
+                    this.left_pressed = true
+                    if (this.isPlaying && this.body.position.z < this.left_bound) {
+                        if (this.up_pressed && this.body.position.x > this.up_bound)
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z+5, x: this.body.position.x-5}, 130).start()
+                        else if (this.down_pressed && this.body.position.x < this.down_bound)
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z+5, x: this.body.position.x+5}, 130).start()
+                        else 
+                            new TWEEN.Tween(this.body.position).to({z: this.body.position.z+5}, 130).start()
+                    }
+                    break
+
+                case 'ArrowUp':
+                    this.up_pressed = true
+                    if (this.isPlaying && this.body.position.x > this.up_bound) {
+                        if (this.left_pressed && this.body.position.z < this.left_bound)
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x-5, z: this.body.position.z+5}, 130).start()
+                        else if (this.right_pressed && this.body.position.z > this.right_bound)
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x-5, z: this.body.position.z-5}, 130).start()
+                        else 
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x-5}, 130).start()
+                    }
+                    break
+
+                case 'ArrowDown':
+                    this.down_pressed = true
+                    if (this.isPlaying && this.body.position.x < this.down_bound) {
+                        if (this.left_pressed && this.body.position.z < this.left_bound)
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x+5, z: this.body.position.z+5}, 130).start()
+                        else if (this.right_pressed && this.body.position.z > this.right_bound)
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x+5, z: this.body.position.z-5}, 130).start()
+                        else 
+                            new TWEEN.Tween(this.body.position).to({x: this.body.position.x+5}, 130).start()
+                    }
                     break
 
                 default:
                     break
             }
         }, false)
+
+        document.addEventListener("keyup", (event) => {
+            switch (event.key) {
+                case 'ArrowRight':
+                    this.right_pressed = false
+                    break
+                
+                case 'ArrowLeft':
+                    this.left_pressed = false
+                    break
+
+                case 'ArrowUp':
+                    this.up_pressed = false
+                    break
+
+                case 'ArrowDown':
+                    this.down_pressed = false
+
+                default:
+                    break
+            }
+        })
     }
 
     run() {
-        if (this.isJumping || this.isCrying) return
+        if (this.isJumping || this.isCrying || this.isPlaying) return
         if (this.isRunning) {
             this.stop()
             this.pose()
@@ -147,9 +224,14 @@ export default class Yoshi {
         
         this.isJumping = true
 
-        if (this.isRunning) {
+        var audio = new Audio('/models/yoshi/sounds/jump'+this.choose(1,2).toString()+'.mp3')
+        audio.volume = 0.5
+        audio.play()
 
-            var jump_tween1 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y+15.0}, 500).easing(TWEEN.Easing.Quadratic.Out).delay(430)
+        if (this.isRunning) {
+            var height = 15
+            if (this.isPlaying) height = 40
+            var jump_tween1 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y+height}, 500).easing(TWEEN.Easing.Quadratic.Out)
             var jump_tween2 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
                 .onComplete(() => {
                     this.isJumping = false
@@ -159,10 +241,6 @@ export default class Yoshi {
 
             var nose_tween = new TWEEN.Tween(this.nose.position).to({y: 0.35}, 200).repeat(1).yoyo(true).delay(300)
             TWEEN.add(nose_tween)
-
-            var audio = new Audio('/models/yoshi/sounds/jump'+this.choose(3).toString()+'.mp3')
-            audio.volume = 0.5
-            audio.play()
 
             this.start()
             return
@@ -178,7 +256,7 @@ export default class Yoshi {
         var arm_tween2 = new TWEEN.Tween(this.R_arm.rotation).to({x: 0.5}, 300).repeat(1).yoyo(true).delay(300)
         var arm_tween1_b = new TWEEN.Tween(this.L_arm.rotation).to({x: -3.0}, 300).repeat(1).yoyo(true).delay(300)
         var arm_tween2_b = new TWEEN.Tween(this.R_arm.rotation).to({x: -2.0}, 300).repeat(1).yoyo(true).delay(300)
-        if (this.choose(2) == 1){
+        if (this.choose(1,2) == 1){
             TWEEN.add(arm_tween1)
             TWEEN.add(arm_tween2)
         } 
@@ -219,9 +297,7 @@ export default class Yoshi {
         var jump_tween2 = new TWEEN.Tween(this.body.position).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
         jump_tween1.chain(jump_tween2, foot_tween5, foot_tween6)
         TWEEN.add(jump_tween1)
-
-        var audio = new Audio('/models/yoshi/sounds/jump'+this.choose(3).toString()+'.mp3')
-        audio.volume = 0.5
+        
         audio.play()
         
         this.start()
@@ -230,7 +306,7 @@ export default class Yoshi {
     }
 
     cry() {
-        if (this.isCrying || this.isJumping) return
+        if (this.isCrying || this.isJumping || !this.isPlaying) return
         this.isCrying = true
         this.stop()
         this.pose()
@@ -270,7 +346,7 @@ export default class Yoshi {
     }
 
     pose() {
-        var body_tween = new TWEEN.Tween(this.body.position).to({y: -15}, 200)
+        var body_tween = new TWEEN.Tween(this.body.position).to({y: this.body.position.y}, 200)
         TWEEN.add(body_tween)
 
         var spine_tween = new TWEEN.Tween(this.spine.rotation).to({x: 0}, 200)
@@ -300,6 +376,25 @@ export default class Yoshi {
         this.start();
     }
 
+    game() {
+        this.stop()
+        this.pose()
+        if (this.isRunning) this.isRunning = false
+        
+        var audio = new Audio('/models/yoshi/sounds/yoshi.mp3')
+        audio.volume = 0.5
+        audio.play()
+
+        var body_tween = new TWEEN.Tween(this.body.rotation).to({y: 270*Math.PI/180}, 2000)
+            .onComplete(() => {
+                this.run()
+                this.isPlaying = true
+            })
+        var nose_tween = new TWEEN.Tween(this.nose.position).to({y: 0.35}, 200).repeat(1).yoyo(true).delay(300)
+        nose_tween.start()
+        body_tween.start()
+    }
+
     start() {
         TWEEN.getAll().forEach(element => {
             element.start()
@@ -310,7 +405,7 @@ export default class Yoshi {
         TWEEN.removeAll()
     }
 
-    choose(n) {
-        return Math.floor(Math.random() * n) + 1 
+    choose(from, to) {
+        return Math.floor(Math.random() * (to - from + 1)) + from
     }
 }

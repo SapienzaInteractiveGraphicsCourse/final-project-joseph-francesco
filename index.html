@@ -3,15 +3,20 @@
 	<head>
 		<link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico"/>
 		<meta charset="utf-8">
-		<title>IG Project</title>
+		<title>Yoshi: Corre Forever "The game" </title>
+		<meta name="description" content="Demo of the game: The Making of 'Yoshi: Corre Forever': Animating a Basic 3D Scene with Three.js" />
+		<meta name="keywords" content="three.js, webgl, tutorial, game, 3d, animation, airplane, web development, javascript" />
+		<meta name="author" content="Joseph Aguilar, Franscesco Starna and special thanks to Karim Maaloul for Codrops" />
+		<link href='https://fonts.googleapis.com/css?family=Playfair+Display:400,700,700italic' rel='stylesheet' type='text/css'/>
+		<link rel="stylesheet" type="text/css" href="css/game.css"/>
 		<style>
 			body { margin: 0; }
 			canvas { display: block; }
 		</style>
 	</head>
 	<body>
-		<script type="text/javascript" src="js/three.min.js"></script>
-		<script src="js/tween.umd.js"></script>
+		<script type="text/javascript" src="js/three.min.js"/></script>
+		<script src="js/tween.umd.js"/></script>
 		<script type="module">
 		
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
@@ -21,6 +26,7 @@
 			import Mashroom from '/js/models/mashroom.js'
 			import Star from '/js/models/star.js'
 			import Goomba from '/js/models/goomba.js'
+			import Game from '/js/game.js'
 
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -33,7 +39,7 @@
 			//Load background texture
 			var loader = new THREE.TextureLoader();
 			loader.load('/assets/background.jpeg', function(texture) {
-            	scene.background = texture;  
+            	scene.background = texture;
             });
 			
 			var light = new THREE.AmbientLight(0x2f2f1f , 2);
@@ -45,27 +51,22 @@
 
 			var orbit = new OrbitControls(camera, renderer.domElement);
 			orbit.enableZoom = false;
-			orbit.autoRotate = true;
-			orbit.autoRotateSpeed = 6.0;
+			orbit.enableKeys = false;
 
 			var yoshi = new Yoshi();
 			yoshi.load().then((model) => {
 				scene.add(model);
 			});
 
-			//var coin = new Coin(scene)
-			//var egg = new Egg(scene)
-			//var mushroom = new Mashroom(scene)
-			//var star = new Star(scene)
-			//var goomba = new Goomba(scene)
-
 			document.addEventListener("keydown", (event) => {
-				switch (event.keyCode) {
-					case 67: // key 'C'
-						//coin.catch()
-						//egg.catch()
-						//mushroom.catch()
-						//star.catch()
+				switch (event.key) {
+					case 'Enter':
+						document.getElementById('instructions').style.display = 'none'
+						document.getElementById('level').style.visibility = 'visible'
+						document.getElementById('dist').style.visibility = 'visible'
+						document.getElementById('energy').style.visibility = 'visible'
+						yoshi.game()
+						new Game(scene, camera, renderer)
 						break
 
 					default:
@@ -83,11 +84,30 @@
 			}
 		</script>
 
-		<div style="left: 30px; top: 30px; padding-left: 10px; padding-right: 10px; position: absolute; font-size: 24px; background-color: black; font-family: 'Courier New', Courier, monospace;">
-			<p style="color:white;"><b style="color:darkgreen;">R</b> to start/stop running</p>
-			<p style="color:white;"><b style="color:darkgreen;">Space</b> to jump</p>
-			<p style="color:white;"><b style="color:darkgreen;">L</b> to cry</p>
-			<p style="color:white;"><b style="color:red;">Enter</b> to start the game</p>
+		<div class="header">
+			<h1>Yoshi</h1>
+			<h2>Corre forever</h2>
+			<div class="score" id="score">
+				<div class="score__content" id="level">
+					<div class="score__label">level</div>
+					<div class="score__value score__value--level" id="levelValue">1</div>
+				</div>
+				<div class="score__content" id="dist">
+					<div class="score__label">distance</div>
+					<div class="score__value score__value--dist" id="distValue">000</div>
+				</div>
+				<div class="score__content" id="energy">
+					<div class="score__label">energy</div>
+					<div class="score__value score__value--dist" id="energyValue">100</div>
+				</div>
+			</div>
 		</div>
+
+		<div class="message message--instructions" id="instructions"> 
+			<span><b style="color:white;">R</b> to start/stop running</span>
+			<span><b style="color:white;">Space</b> to jump</span>
+			<span><b style="color:white;">Enter</b> to start playing</span>
+		</div>
+		
 	</body>
 </html>
