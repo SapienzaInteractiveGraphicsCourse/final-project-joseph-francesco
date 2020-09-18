@@ -7,6 +7,10 @@ export default class Game {
         this.camera = camera
         this.renderer = renderer
         this.radius = 600
+        this.level = document.getElementById('level')
+        this.distance = document.getElementById('dist')
+        this.energy = document.getElementById('energy')
+        this.coins = []
         this.initScene()
     }
 
@@ -14,9 +18,9 @@ export default class Game {
         this.renderer.setClearColor(Colors.blue, 1);
         this.scene.background = null
         document.getElementById('instructions').style.display = 'none'
-        document.getElementById('level').style.visibility = 'visible'
-        document.getElementById('dist').style.visibility = 'visible'
-        document.getElementById('energy').style.visibility = 'visible'
+        this.level.style.visibility = 'visible'
+        this.distance.style.visibility = 'visible'
+        this.energy.style.visibility = 'visible'
         this.initCamera()
         this.world()
         this.objectGenerator()
@@ -44,7 +48,7 @@ export default class Game {
             sphere.position.y = -607
             sphere.position.x = -100
             sphere.rotation.x = 90*Math.PI/180
-            this.scene.add(sphere)
+            //this.scene.add(sphere)
 
             var rotation_tween = new TWEEN.Tween(sphere.rotation).to({y: -360*Math.PI/180}, 50000).repeat(Infinity)
             TWEEN.add(rotation_tween)
@@ -55,7 +59,7 @@ export default class Game {
         var nClouds = 20;
         var stepAngle = Math.PI*2 / nClouds;
         
-        for(var i = 0; i < nClouds; i++){
+        for (var i = 0; i < nClouds; i++) {
             var c = new Cloud();
             var a = stepAngle*i;
             var h = this.radius + 200
@@ -75,8 +79,9 @@ export default class Game {
         TWEEN.add(rotation_tween)
     }
 
+    // generate coins etc.
     objectGenerator() {
-
+        
     }
 
     start() {
