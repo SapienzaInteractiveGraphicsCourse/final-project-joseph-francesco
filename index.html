@@ -22,7 +22,6 @@
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
 			import Game from '/js/game.js'
-			import {Coin, Egg, Mushroom, Star, Goomba} from '/js/models/characters.js'
 
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -59,7 +58,7 @@
 						break
 
 					case 'p':
-						console.log(TWEEN.getAll())
+						//console.log(TWEEN.getAll())
 					default:
 						break
 				}
