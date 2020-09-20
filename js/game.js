@@ -21,7 +21,7 @@ export class Game {
 
             distance:0,
             ratioSpeedDistance:50,
-            energy:100,
+            energy:5,
             ratioSpeedEnergy:3,
 
             level:1,
@@ -263,10 +263,12 @@ function loop() {
         game.speed = game.baseSpeed * game.planeSpeed;
 
     }else if(game.status=="gameover"){
-        game.speed *= .99;
+        console.log('Game over! ');
+        game.speed *= 0.0;
         // airplane.mesh.rotation.z += (-Math.PI/2 - airplane.mesh.rotation.z)*.0002*deltaTime;
         // airplane.mesh.rotation.x += 0.0003*deltaTime;
         game.planeFallSpeed *= 1.05;
+        the_yoshi.cry();
         // airplane.mesh.position.y -= game.planeFallSpeed*deltaTime;
 
         // if (airplane.mesh.position.y <-200){
