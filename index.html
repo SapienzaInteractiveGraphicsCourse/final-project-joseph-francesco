@@ -22,6 +22,7 @@
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
 			import Game from '/js/game.js'
+			import {Coin, Egg, Mushroom, Star, Goomba} from '/js/models/characters.js'
 
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -48,10 +49,7 @@
 			orbit.enableZoom = false;
 			orbit.enableKeys = false;
 
-			var yoshi = new Yoshi();
-			yoshi.load().then((model) => {
-				scene.add(model);
-			});
+			var yoshi = new Yoshi(scene);
 
 			document.addEventListener("keydown", (event) => {
 				switch (event.key) {
@@ -73,8 +71,8 @@
 				requestAnimationFrame(animate);
 				orbit.update();
 				yoshi.update()
-				renderer.render(scene, camera);
 				TWEEN.update();
+				renderer.render(scene, camera);
 			}
 		</script>
 

@@ -48,7 +48,7 @@ export default class Game {
             sphere.position.y = -607
             sphere.position.x = -100
             sphere.rotation.x = 90*Math.PI/180
-            //this.scene.add(sphere)
+            this.scene.add(sphere)
 
             var rotation_tween = new TWEEN.Tween(sphere.rotation).to({y: -360*Math.PI/180}, 50000).repeat(Infinity)
             TWEEN.add(rotation_tween)
@@ -81,7 +81,10 @@ export default class Game {
 
     // generate coins etc.
     objectGenerator() {
-        
+        /*var coin = new Coin(this.scene)
+        coin.load().then((mesh) => {
+            
+        })*/
     }
 
     start() {
