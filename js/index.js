@@ -274,8 +274,9 @@ initScene = function() {
 
 };
 
-
 window.onload = initScene();
+
+
 
 function createSea(){
   sea = new Sea();
