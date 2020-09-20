@@ -5,6 +5,8 @@ var deltaTime = 0;
 var newTime = new Date().getTime();
 var oldTime = new Date().getTime();
 var fieldLevel;
+var rotation_tween;
+var coinsHolder;
 
 export class Game {
 
@@ -21,7 +23,7 @@ export class Game {
 
             distance:0,
             ratioSpeedDistance:50,
-            energy:5,
+            energy:100,
             ratioSpeedEnergy:3,
 
             level:1,
@@ -148,16 +150,17 @@ export class Game {
         sky.position.x = -100
         this.scene.add(sky);
         
-        var rotation_tween = new TWEEN.Tween(sky.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
+        rotation_tween = new TWEEN.Tween(sky.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
         TWEEN.add(rotation_tween)
     }
 
     // generate coins etc.
     objectGenerator() {
-        /*var coin = new Coin(this.scene)
-        coin.load().then((mesh) => {
-            
-        })*/
+        // var coin = new Coin(this.scene)
+        // coin.load().then((mesh) => {
+        //     the_scene.add(coin)
+        // })
+        this.createCoins();
     }
 
     start() {
@@ -182,7 +185,7 @@ export class Game {
 
     updateEnergy(){
         game.energy -= game.speed*deltaTime*game.ratioSpeedEnergy;
-        console.log('energy ',game.energy);
+        //console.log('energy ',game.energy);
         game.energy = Math.max(0, game.energy);
         this.energyBar.innerHTML = Math.floor(game.energy);
 
@@ -210,18 +213,25 @@ export class Game {
         return tv;
     }
 
+
+    createCoins(){
+
+        coinsHolder = new CoinsHolder(20);
+        the_scene.add(coinsHolder.mesh)
+    }
+
 }
 
 var my_game, the_yoshi, the_orbit, the_scene, the_renderer, the_camera;
 
 export default function InitGame(scene, camera, renderer, orbit, yoshi) {
 
-    my_game = new Game(scene, camera, renderer);
     the_yoshi = yoshi;
     the_orbit = orbit;
     the_scene = scene;
     the_renderer = renderer;
     the_camera = camera;
+    my_game = new Game(scene, camera, renderer);
 
     console.log('Im here boy ', this.the_orbit);
     loop();
@@ -237,7 +247,7 @@ function loop() {
         // Add energy coins every 100m;
         if (Math.floor(game.distance)%game.distanceForCoinsSpawn == 0 && Math.floor(game.distance) > game.coinLastSpawn){
             game.coinLastSpawn = Math.floor(game.distance);
-            // coinsHolder.spawnCoins();
+            coinsHolder.spawnCoins();
         }
 
         if (Math.floor(game.distance)%game.distanceForSpeedUpdate == 0 && Math.floor(game.distance) > game.speedLastUpdate){
@@ -272,6 +282,8 @@ function loop() {
         // airplane.mesh.rotation.x += 0.0003*deltaTime;
         game.planeFallSpeed *= 1.05;
         the_yoshi.cry();
+
+        TWEEN.remove(rotation_tween)
         // airplane.mesh.position.y -= game.planeFallSpeed*deltaTime;
 
         // if (airplane.mesh.position.y <-200){
@@ -285,6 +297,82 @@ function loop() {
 
 
     animate();
+}
+
+
+var CoinNew = function(){
+    var geom = new THREE.TetrahedronGeometry(5,0);
+    var mat = new THREE.MeshPhongMaterial({
+        color:0x009999,
+        shininess:0,
+        specular:0xffffff,
+
+        shading:THREE.FlatShading
+    });
+    this.mesh = new THREE.Mesh(geom,mat);
+    this.mesh.castShadow = true;
+    this.angle = 0;
+    this.dist = 0;
+}
+
+var CoinsHolder = function (nCoins){
+    this.mesh = new THREE.Object3D();
+    this.coinsInUse = [];
+    this.coinsPool = [];
+    for (var i=0; i<nCoins; i++){
+        console.log('coin created')
+        var coin_val = new CoinNew();
+        this.coinsPool.push(coin_val);
+    }
+}
+
+CoinsHolder.prototype.spawnCoins = function(){
+
+    var nCoins = 1 + Math.floor(Math.random()*10);
+    var d = game.seaRadius + game.planeDefaultHeight + (-1 + Math.random() * 2) * (game.planeAmpHeight-20);
+    var amplitude = 10 + Math.round(Math.random()*10);
+    for (var i=0; i<nCoins; i++){
+        var coin_act;
+        if (this.coinsPool.length) {
+            coin_act = this.coinsPool.pop();
+        }else{
+            coin_act = new CoinNew();
+        }
+        this.mesh.add(coin_act.mesh);
+        this.coinsInUse.push(coin_act);
+        coin_act.angle = - (i*0.02);
+        coin_act.distance = d + Math.cos(i*.5)*amplitude;
+        coin_act.mesh.position.y = -game.seaRadius + Math.sin(coin_act.angle)*coin_act.distance;
+        coin_act.mesh.position.x = Math.cos(coin_act.angle)*coin_act.distance;
+    }
+}
+
+CoinsHolder.prototype.rotateCoins = function(){
+    for (var i=0; i<this.coinsInUse.length; i++){
+        var coin = this.coinsInUse[i];
+        if (coin.exploding) continue;
+        coin.angle += game.speed*deltaTime*game.coinsSpeed;
+        if (coin.angle>Math.PI*2) coin.angle -= Math.PI*2;
+        coin.mesh.position.y = -game.seaRadius + Math.sin(coin.angle)*coin.distance;
+        coin.mesh.position.x = Math.cos(coin.angle)*coin.distance;
+        coin.mesh.rotation.z += Math.random()*.1;
+        coin.mesh.rotation.y += Math.random()*.1;
+
+        //var globalCoinPosition =  coin.mesh.localToWorld(new THREE.Vector3());
+        var diffPos = airplane.mesh.position.clone().sub(coin.mesh.position.clone());
+        var d = diffPos.length();
+        if (d<game.coinDistanceTolerance){
+            this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+            this.mesh.remove(coin.mesh);
+            particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, 0x009999, .8);
+            addEnergy();
+            i--;
+        }else if (coin.angle > Math.PI){
+            this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+            this.mesh.remove(coin.mesh);
+            i--;
+        }
+    }
 }
 
 
