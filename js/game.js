@@ -15,6 +15,10 @@ export default class Game {
     }
 
     async initScene() {
+
+        fieldDistance = document.getElementById("distValue");
+        energyBar = document.getElementById("energyBar");
+
         this.renderer.setClearColor(Colors.blue, 1);
         this.scene.background = null
         document.getElementById('instructions').style.display = 'none'
@@ -93,7 +97,44 @@ export default class Game {
     stop() {
         TWEEN.removeAll()
     }
+
+
+    updateDistance(){
+        game.distance += game.speed*deltaTime*game.ratioSpeedDistance;
+        fieldDistance.innerHTML = Math.floor(game.distance);
+        var d = 502*(1-(game.distance%game.distanceForLevelUpdate)/game.distanceForLevelUpdate);
+        levelCircle.setAttribute("stroke-dashoffset", d);
+
+    }
+
+    updateEnergy(){
+        game.energy -= game.speed*deltaTime*game.ratioSpeedEnergy;
+        game.energy = Math.max(0, game.energy);
+
+        if (game.energy<30){
+            energyBar.style.animationName = "blinking";
+        }else{
+            energyBar.style.animationName = "none";
+        }
+
+        if (game.energy <1){
+            game.status = "gameover";
+        }
+    }
+
+
+    addEnergy(){
+        game.energy += game.coinValue;
+        game.energy = Math.min(game.energy, 100);
+    }
+
+    removeEnergy(){
+        game.energy -= game.ennemyValue;
+        game.energy = Math.max(0, game.energy);
+    }
 }
+
+var fieldDistance, energyBar;
 
 var Colors = {
 	red:0xf25346,
