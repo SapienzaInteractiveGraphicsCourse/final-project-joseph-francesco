@@ -154,7 +154,10 @@ export class Game {
 
     // generate coins etc.
     objectGenerator() {
-        
+        /*var coin = new Coin(this.scene)
+        coin.load().then((mesh) => {
+            
+        })*/
     }
 
     start() {

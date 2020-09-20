@@ -1,23 +1,33 @@
 import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js'
 export default class Yoshi {
 
-    constructor() {
+    constructor(scene) {
+
         this.isJumping = false;
         this.isRunning = false;
         this.isCrying = false;
         this.isPlaying = false;
         this.isWaiting = false;
         this.yoshiTweens = new TWEEN.Group()
+        
+        this.jump1_audio = new Audio('/models/yoshi/sounds/jump1.mp3')
+        this.jump1_audio.volume = 0.5
+        this.jump2_audio = new Audio('/models/yoshi/sounds/jump2.mp3')
+        this.jump2_audio.volume = 0.5
+        this.yoshi_audio = new Audio('/models/yoshi/sounds/yoshi.mp3')
+        this.yoshi_audio.volume = 0.5
+        this.lose_audio = new Audio('/models/yoshi/sounds/lose.mp3')
+        this.lose_audio.volume = 0.5
+
+        this.load(scene)
     }
 
-    async load() {
+    async load(scene) {
         var loader = new GLTFLoader()
-        return new Promise((resolve, reject) => {
-            loader.load('/models/yoshi/scene.gltf', object => {
-                this.init(object.scene)
-                resolve(object.scene)
-            }, null, reject)
-        })
+        loader.load('/models/yoshi/scene.gltf', object => {
+            this.init(object.scene)
+            scene.add(object.scene)
+        }, null, null)
     }
 
     init(model) {
@@ -44,8 +54,8 @@ export default class Yoshi {
         this.down_pressed = false
         this.right_bound = -60
         this.left_bound = 60
-        this.up_bound = -60
-        this.down_bound = 60
+        this.up_bound = -40
+        this.down_bound = 50
         
         this.keyboard();
     }
@@ -235,9 +245,8 @@ export default class Yoshi {
         this.isJumping = true
         var jump_height = 15
 
-        var audio = new Audio('/models/yoshi/sounds/jump'+this.choose(1,2).toString()+'.mp3')
-        audio.volume = 0.5
-        audio.play()
+        if (this.choose(1,2) == 1) this.jump1_audio.play()
+        else this.jump2_audio.play()
 
         if (this.isRunning) {
             
@@ -351,9 +360,7 @@ export default class Yoshi {
         var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.4}, 400).repeat(4).yoyo(true)
         this.yoshiTweens.add(nose_tween)
 
-        var audio = new Audio('/models/yoshi/sounds/lose.mp3')
-        audio.volume = 0.5
-        audio.play()
+        this.lose_audio.play()
 
         this.start()
     }
@@ -394,9 +401,7 @@ export default class Yoshi {
         this.stop()
         this.pose()
         
-        var audio = new Audio('/models/yoshi/sounds/yoshi.mp3')
-        audio.volume = 0.5
-        audio.play()
+        this.yoshi_audio.play()
 
         var body_tween = new TWEEN.Tween(this.body.rotation, this.yoshiTweens).to({y: 270*Math.PI/180}, 2000)
             .onComplete(() => {
