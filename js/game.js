@@ -1,8 +1,75 @@
 import {Coin, Egg, Mushroom, Star, Goomba} from '/js/models/characters.js'
 
-export default class Game {
+var game;
+var deltaTime = 0;
+var newTime = new Date().getTime();
+var oldTime = new Date().getTime();
+var fieldLevel;
+
+export class Game {
 
     constructor(scene, camera, renderer) {
+
+        game = {speed:0,
+            initSpeed:.00035,
+            baseSpeed:.00035,
+            targetBaseSpeed:.00035,
+            incrementSpeedByTime:.0000025,
+            incrementSpeedByLevel:.000005,
+            distanceForSpeedUpdate:100,
+            speedLastUpdate:0,
+
+            distance:0,
+            ratioSpeedDistance:50,
+            energy:100,
+            ratioSpeedEnergy:3,
+
+            level:1,
+            levelLastUpdate:0,
+            distanceForLevelUpdate:1000,
+
+            planeDefaultHeight:100,
+            planeAmpHeight:80,
+            planeAmpWidth:75,
+            planeMoveSensivity:0.005,
+            planeRotXSensivity:0.0008,
+            planeRotZSensivity:0.0004,
+            planeFallSpeed:.001,
+            planeMinSpeed:1.2,
+            planeMaxSpeed:1.6,
+            planeSpeed:0,
+            planeCollisionDisplacementX:0,
+            planeCollisionSpeedX:0,
+
+            planeCollisionDisplacementY:0,
+            planeCollisionSpeedY:0,
+
+            seaRadius:600,
+            seaLength:800,
+            //seaRotationSpeed:0.006,
+            wavesMinAmp : 5,
+            wavesMaxAmp : 20,
+            wavesMinSpeed : 0.001,
+            wavesMaxSpeed : 0.003,
+
+            cameraFarPos:500,
+            cameraNearPos:150,
+            cameraSensivity:0.002,
+
+            coinDistanceTolerance:15,
+            coinValue:3,
+            coinsSpeed:.5,
+            coinLastSpawn:0,
+            distanceForCoinsSpawn:100,
+
+            ennemyDistanceTolerance:10,
+            ennemyValue:10,
+            ennemiesSpeed:.6,
+            ennemyLastSpawn:0,
+            distanceForEnnemiesSpawn:50,
+
+            status : "playing",
+        };
         this.scene = scene
         this.camera = camera
         this.renderer = renderer
@@ -10,8 +77,12 @@ export default class Game {
         this.level = document.getElementById('level')
         this.distance = document.getElementById('dist')
         this.energy = document.getElementById('energy')
+        this.fieldDistance = document.getElementById("distValue");
+        fieldLevel = document.getElementById("levelValue");
+        this.energyBar = document.getElementById("energyValue");
         this.coins = []
         this.initScene()
+        fieldLevel.innerHTML = Math.floor(game.level);
     }
 
     async initScene() {
@@ -24,7 +95,9 @@ export default class Game {
         this.initCamera()
         this.world()
         this.objectGenerator()
+
     }
+
 
     initCamera() {
         var camera_tween1 = new TWEEN.Tween(this.camera.position).to({x: 100}, 2000)
@@ -48,7 +121,7 @@ export default class Game {
             sphere.position.y = -607
             sphere.position.x = -100
             sphere.rotation.x = 90*Math.PI/180
-            //this.scene.add(sphere)
+            this.scene.add(sphere)
 
             var rotation_tween = new TWEEN.Tween(sphere.rotation).to({y: -360*Math.PI/180}, 50000).repeat(Infinity)
             TWEEN.add(rotation_tween)
@@ -93,8 +166,132 @@ export default class Game {
     stop() {
         TWEEN.removeAll()
     }
+
+    updateDistance(){
+        game.distance += game.speed*deltaTime*game.ratioSpeedDistance;
+        this.fieldDistance.innerHTML = Math.floor(game.distance);
+    }
+
+    updateYoshi() {
+        game.planeSpeed = 1.8;
+        // game.planeSpeed = this.normalize(mousePos.x, -.5, .5, game.planeMinSpeed, game.planeMaxSpeed);
+    }
+
+    updateEnergy(){
+        game.energy -= game.speed*deltaTime*game.ratioSpeedEnergy;
+        console.log('energy ',game.energy);
+        game.energy = Math.max(0, game.energy);
+        this.energyBar.innerHTML = Math.floor(game.energy);
+
+        if (game.energy <1){
+            game.status = "gameover";
+        }
+    }
+
+    addEnergy(){
+        game.energy += game.coinValue;
+        game.energy = Math.min(game.energy, 100);
+    }
+
+    removeEnergy(){
+        game.energy -= game.ennemyValue;
+        game.energy = Math.max(0, game.energy);
+    }
+
+    normalize(v,vmin,vmax,tmin, tmax){
+        var nv = Math.max(Math.min(v,vmax), vmin);
+        var dv = vmax-vmin;
+        var pc = (nv-vmin)/dv;
+        var dt = tmax-tmin;
+        var tv = tmin + (pc*dt);
+        return tv;
+    }
+
 }
 
+var my_game, the_yoshi, the_orbit, the_scene, the_renderer, the_camera;
+
+export default function InitGame(scene, camera, renderer, orbit, yoshi) {
+
+    my_game = new Game(scene, camera, renderer);
+    the_yoshi = yoshi;
+    the_orbit = orbit;
+    the_scene = scene;
+    the_renderer = renderer;
+    the_camera = camera;
+
+    console.log('Im here boy ', this.the_orbit);
+    loop();
+}
+
+function loop() {
+    newTime = new Date().getTime();
+    deltaTime = newTime-oldTime;
+    oldTime = newTime;
+
+    if (game.status=="playing"){
+
+        // Add energy coins every 100m;
+        if (Math.floor(game.distance)%game.distanceForCoinsSpawn == 0 && Math.floor(game.distance) > game.coinLastSpawn){
+            game.coinLastSpawn = Math.floor(game.distance);
+            // coinsHolder.spawnCoins();
+        }
+
+        if (Math.floor(game.distance)%game.distanceForSpeedUpdate == 0 && Math.floor(game.distance) > game.speedLastUpdate){
+            game.speedLastUpdate = Math.floor(game.distance);
+            game.targetBaseSpeed += game.incrementSpeedByTime*deltaTime;
+        }
+
+
+        if (Math.floor(game.distance)%game.distanceForEnnemiesSpawn == 0 && Math.floor(game.distance) > game.ennemyLastSpawn){
+            game.ennemyLastSpawn = Math.floor(game.distance);
+            // ennemiesHolder.spawnEnnemies();
+        }
+
+        if (Math.floor(game.distance)%game.distanceForLevelUpdate == 0 && Math.floor(game.distance) > game.levelLastUpdate){
+            game.levelLastUpdate = Math.floor(game.distance);
+            game.level++;
+            fieldLevel.innerHTML = Math.floor(game.level);
+
+            game.targetBaseSpeed = game.initSpeed + game.incrementSpeedByLevel*game.level
+        }
+
+        my_game.updateYoshi();
+        my_game.updateDistance();
+        my_game.updateEnergy();
+        game.baseSpeed += (game.targetBaseSpeed - game.baseSpeed) * deltaTime * 0.02;
+        game.speed = game.baseSpeed * game.planeSpeed;
+
+    }else if(game.status=="gameover"){
+        game.speed *= .99;
+        // airplane.mesh.rotation.z += (-Math.PI/2 - airplane.mesh.rotation.z)*.0002*deltaTime;
+        // airplane.mesh.rotation.x += 0.0003*deltaTime;
+        game.planeFallSpeed *= 1.05;
+        // airplane.mesh.position.y -= game.planeFallSpeed*deltaTime;
+
+        // if (airplane.mesh.position.y <-200){
+        //     showReplay();
+        //     game.status = "waitingReplay";
+        //
+        // }
+    }else if (game.status=="waitingReplay"){
+
+    }
+
+
+    animate();
+}
+
+
+
+
+function animate() {
+    requestAnimationFrame(loop);
+    the_orbit.update();
+    the_yoshi.update();
+    the_renderer.render(the_scene, the_camera);
+    TWEEN.update();
+}
 var Colors = {
 	red:0xf25346,
 	white:0xd8d0d1,
