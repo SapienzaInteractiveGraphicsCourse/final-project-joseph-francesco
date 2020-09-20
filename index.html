@@ -21,10 +21,7 @@
 		
 			import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
 			import Yoshi from '/js/models/yoshi.js'
-			import InitGame from '/js/game.js'
-			import loop from '/js/game.js'
-			import {Coin, Egg, Mushroom, Star, Goomba} from '/js/models/characters.js'
-
+			import Game from '/js/game.js'
 
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -52,12 +49,14 @@
 			orbit.enableKeys = false;
 
 			var yoshi = new Yoshi(scene);
+			var game = new Game(scene, camera, renderer, yoshi);
+
+			animate();
 
 			document.addEventListener("keydown", (event) => {
 				switch (event.key) {
 					case 'Enter':
-						new InitGame(scene, camera, renderer, orbit, yoshi);
-						yoshi.game()
+						game.play()
 						break
 
 					case 'p':
@@ -67,12 +66,10 @@
 				}
 			}, false)
 
-			animate();
-
 			function animate() {
 				requestAnimationFrame(animate);
 				orbit.update();
-				yoshi.update()
+				game.update();
 				TWEEN.update();
 				renderer.render(scene, camera);
 			}

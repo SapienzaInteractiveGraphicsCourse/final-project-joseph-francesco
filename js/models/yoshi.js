@@ -177,7 +177,7 @@ export default class Yoshi {
         })
     }
 
-    run(v=1) {
+    run() {
         if (this.isJumping || this.isCrying || this.isWaiting) return
         if (this.isRunning) {
             this.stop()
@@ -188,49 +188,49 @@ export default class Yoshi {
         
         this.isRunning = true
 
-        var body_tween1 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y+0.5}, 200/v)
-        var body_tween2 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y-0.5}, 200/v)
+        var body_tween1 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y+0.5}, 200)
+        var body_tween2 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y-0.5}, 200)
         body_tween1.chain(body_tween2.chain(body_tween1))
         this.yoshiTweens.add(body_tween1)
 
-        var spine_tween1 = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0.5}, 400/v)
+        var spine_tween1 = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0.5}, 400)
         this.yoshiTweens.add(spine_tween1)
         
-        var head_tween1 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: 0.1}, 200/v)
-        var head_tween2 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: -0.1}, 400/v)
-        var head_tween3 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: 0.0}, 200/v)
-        var head_tween4 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({x: -0.3}, 400/v)
+        var head_tween1 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: 0.1}, 200)
+        var head_tween2 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: -0.1}, 400)
+        var head_tween3 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: 0.0}, 200)
+        var head_tween4 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({x: -0.3}, 400)
         this.yoshiTweens.add(head_tween4)
         head_tween1.chain(head_tween2.chain(head_tween3.chain(head_tween1)))
         this.yoshiTweens.add(head_tween1)
 
-        var tail_tween1 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: 0.3}, 200/v)
-        var tail_tween2 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: -0.3}, 400/v)
-        var tail_tween3 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: 0.0}, 200/v)
+        var tail_tween1 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: 0.3}, 200)
+        var tail_tween2 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: -0.3}, 400)
+        var tail_tween3 = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: 0.0}, 200)
         tail_tween1.chain(tail_tween2.chain(tail_tween3.chain(tail_tween1)))
         this.yoshiTweens.add(tail_tween1)
 
-        var leg_tween1 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -4.2}, 200/v)
-        var leg_tween2 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -1.8}, 400/v)
-        var leg_tween3 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -3.14}, 200/v)
+        var leg_tween1 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -4.2}, 200)
+        var leg_tween2 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -1.8}, 400)
+        var leg_tween3 = new TWEEN.Tween(this.L_leg.rotation, this.yoshiTweens).to({x: -3.14}, 200)
         leg_tween1.chain(leg_tween2.chain(leg_tween3.chain(leg_tween1)))
         this.yoshiTweens.add(leg_tween1)
         
-        var leg_tween4 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: 1.5}, 200/v)
-        var leg_tween5 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: -1.0}, 400/v)
-        var leg_tween6 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: 0.0}, 200/v)
+        var leg_tween4 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: 1.5}, 200)
+        var leg_tween5 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: -1.0}, 400)
+        var leg_tween6 = new TWEEN.Tween(this.R_leg.rotation, this.yoshiTweens).to({x: 0.0}, 200)
         leg_tween4.chain(leg_tween5.chain(leg_tween6.chain(leg_tween4)))
         this.yoshiTweens.add(leg_tween4)			
         
-        var arm_tween1 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -2.5}, 200/v)
-        var arm_tween2 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -5.0}, 400/v)
-        var arm_tween3 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -4.0}, 200/v)
+        var arm_tween1 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -2.5}, 200)
+        var arm_tween2 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -5.0}, 400)
+        var arm_tween3 = new TWEEN.Tween(this.L_arm.rotation, this.yoshiTweens).to({x: -4.0}, 200)
         arm_tween1.chain(arm_tween2.chain(arm_tween3.chain(arm_tween1)))
         this.yoshiTweens.add(arm_tween1)
 
-        var arm_tween4 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: -1.5}, 200/v)
-        var arm_tween5 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: 0.5}, 400/v)
-        var arm_tween6 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: -0.5}, 200/v)
+        var arm_tween4 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: -1.5}, 200)
+        var arm_tween5 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: 0.5}, 400)
+        var arm_tween6 = new TWEEN.Tween(this.R_arm.rotation, this.yoshiTweens).to({x: -0.5}, 200)
         arm_tween4.chain(arm_tween5.chain(arm_tween6.chain(arm_tween4)))
         this.yoshiTweens.add(arm_tween4)
         
@@ -396,7 +396,7 @@ export default class Yoshi {
         this.start();
     }
 
-    game() {
+    play() {
         this.isWaiting = true
         this.stop()
         this.pose()
@@ -415,6 +415,10 @@ export default class Yoshi {
         this.start()
     }
 
+    increaseSpeed() {
+
+    }
+
     start() {
         this.yoshiTweens.getAll().forEach(element => {
             element.start()
@@ -429,7 +433,10 @@ export default class Yoshi {
         return Math.floor(Math.random() * (to - from + 1)) + from
     }
 
-    update() {
+    update(step) {
+        this.yoshiTweens.getAll().forEach(element => {
+            element.duration(element._duration/step)
+        })
         this.yoshiTweens.update()
     }
 }
