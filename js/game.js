@@ -1,42 +1,44 @@
 import {Coin, Egg, Mushroom, Star, Goomba, Cloud, Colors} from '/js/models/objects.js'
 
-export default class Game {
+class GameSettings {
 
-    deltaTime = 0;
-    newTime = new Date().getTime();
-    oldTime = new Date().getTime();
-
-    game = {speed:0,
-        initSpeed:.00035,
-        baseSpeed:.00035,
-        targetBaseSpeed:.00035,
-        yoshiSpeed: 1,
-        incrementYoshiSpeedByTime:.0005,
-        incrementSpeedByTime:.0000025,
-        incrementSpeedByLevel:.000005,
+    settings = {
+        speed:1,
+        initSpeed:1,
+        targetSpeed:.00001,
+        incrementSpeedByDistance:.00001,
+        incrementSpeedByLevel:.0005,
         distanceForSpeedUpdate:100,
         speedLastUpdate:0,
+        maxSpeed:30,
+        
+        rotationSpeed:1,
+        ratioRotationSpeed:.00000001,
+        yoshiSpeed:1,
+        ratioYoshiSpeed:.00000001,
         
         distance:0,
-        ratioSpeedDistance:50,
+        ratioSpeedDistance:.25,
         energy:100,
-        ratioSpeedEnergy:8,
+        ratioSpeedEnergy:.01,
 
         level:1,
         levelLastUpdate:0,
         distanceForLevelUpdate:1000,
 
         fieldRadius:600, 
-        fieldLength:800, 
+        fieldLength:800,
+        xPosition:-100,
+        yPosition:-607,
 
         coinDistanceTolerance:15,
         coinValue:3,
         coinLastSpawn:0,
-        distanceForCoinsSpawn:100,
+        distanceForEnergySpawn:100,
 
-        ennemyDistanceTolerance:10,
-        ennemyValue:10,
-        ennemyLastSpawn:0,
+        enemyDistanceTolerance:10,
+        enemyValue:10,
+        enemyLastSpawn:0,
         distanceForEnnemiesSpawn:50,
 
         nClouds:20,
@@ -44,17 +46,23 @@ export default class Game {
         nGoombas:30,
         nEggs:5,
 
-        coinsArray: [],
-        goombasArray: [],
-        eggsArray: [],
+        coinsArray:[],
+        goombasArray:[],
+        eggsArray:[],
 
-        coinAudio: new Audio('/models/coin/sounds/catch.mp3'),
-        goombaAudio: new Audio('/models/goomba/sounds/ouch.mp3'),
-        eggAudio: new Audio('/models/egg/sounds/eat.mp3'),
+        title: 'Yoshi',
+        subtitle: 'corre forever',
 
-        status : 'waiting'
+        status:'init'
     }
+}
 
+export default class Game {
+
+    game = new GameSettings().settings
+    
+    title = document.getElementById("title")
+    subtitle = document.getElementById('subtitle')
     level = document.getElementById('level')
     distance = document.getElementById('dist')
     energy = document.getElementById('energy')
@@ -62,6 +70,8 @@ export default class Game {
     fieldLevel = document.getElementById("levelValue")
     fieldEnergy = document.getElementById("energyValue")
     instruction = document.getElementById('instructions')
+    globalMesh = new THREE.Object3D()
+    globalRotationTween = new TWEEN.Tween(this.globalMesh.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
 
     constructor(scene, camera, renderer, yoshi) {
     
@@ -69,25 +79,100 @@ export default class Game {
         this.camera = camera
         this.renderer = renderer    
         this.yoshi = yoshi
-    
-        this.game.coinAudio.volume = 0.05
-        this.game.eggAudio.volume = 0.05
-        this.game.goombaAudio.volume = 0.05
+        
+        this.coinAudio = new Audio('/models/coin/sounds/catch.mp3')
+        this.goombaAudio = new Audio('/models/goomba/sounds/ouch.mp3')
+        this.eggAudio = new Audio('/models/egg/sounds/eat.mp3')
+        this.coinAudio.volume = 0.05
+        this.eggAudio.volume = 0.05
+        this.goombaAudio.volume = 0.05
+
+        Coin.load().then((mesh) => {this.coinMesh = mesh})
+        Goomba.load().then((mesh) => {this.goombaMesh = mesh})
+        Egg.load().then((mesh) => {this.eggMesh = mesh})
+        new THREE.TextureLoader().load('assets/grass.jpeg', (texture) => {
+            this.worldTexture = texture
+            this.init()
+        })
+
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case 'Enter':
+                    this.play()
+                    break
+                case 'p':
+                    console.log(this.game)
+                    console.log(this.yoshi)
+                    console.log(this.globalMesh)
+                default:
+                    break
+            }
+        }, false)
+    }
+
+    init() {
+        // field
+        var geometry = new THREE.CylinderGeometry(this.game.fieldRadius, this.game.fieldRadius, this.game.fieldLength, 64)
+        var material = new THREE.MeshBasicMaterial({map: this.worldTexture})
+        var cylinder = new THREE.Mesh(geometry, material)
+        cylinder.rotation.x = 90*Math.PI/180
+        cylinder.name = 'Field'
+        this.globalMesh.add(cylinder)
+
+        // sky
+        var sky = new THREE.Object3D()
+        sky.name = 'Sky'
+        var stepAngle = Math.PI*2 / this.game.nClouds
+        
+        for (var i = 0; i < this.game.nClouds; i++) {
+            var c = new Cloud()
+            var a = stepAngle*i
+            var h = this.game.fieldRadius + 200
+            c.mesh.position.y = Math.sin(a)*h
+            c.mesh.position.x = Math.cos(a)*h
+            c.mesh.position.z = 200-Math.random()*500
+            c.mesh.rotation.z = a + Math.PI/2
+            var s = 1 + Math.random()*2
+            c.mesh.scale.set(s, s, s)
+            sky.add(c.mesh)
+        } 
+        this.globalMesh.add(sky)
+        this.globalMesh.position.x = this.game.xPosition
+        this.globalMesh.position.y = this.game.yPosition
     }
 
     play() {
-        this.scene.background = null
-        this.renderer.setClearColor(Colors.blue, 1);
-
-        this.instruction.style.display = 'none'
-        this.level.style.visibility = 'visible'
-        this.distance.style.visibility = 'visible'
-        this.energy.style.visibility = 'visible'
-        this.fieldLevel.innerHTML = Math.floor(this.game.level);
-
-        this.world()
+        if (this.game.status == 'playing') return
+        
+        else if (this.game.status == 'init') {
+            this.scene.background = null
+            this.instruction.style.display = 'none'
+            this.level.style.visibility = 'visible'
+            this.distance.style.visibility = 'visible'
+            this.energy.style.visibility = 'visible'
+            this.renderer.setClearColor(Colors.blue, 1);
+            this.scene.add(this.globalMesh)
+            this.initCamera()
+        }
+        
+        else if (this.game.status == 'waiting') this.reset()
+        
         this.yoshi.play()
-        this.initCamera()
+
+        this.spawnCoins()
+        this.spawnGoombas()
+    }
+
+    reset() {
+        this.game = new GameSettings().settings
+        this.fieldEnergy.innerHTML = this.game.energy
+        this.fieldLevel.innerHTML = this.game.level
+        this.fieldDistance.innerHTML = this.game.distance
+        this.title.innerHTML = this.game.title
+        this.subtitle.innerHTML = this.game.subtitle
+        this.globalRotationTween.delay(2000).start().onStart(() => {
+            this.game.status = 'playing'
+        })
     }
 
     initCamera() {
@@ -95,85 +180,35 @@ export default class Game {
         var camera_tween2 = new TWEEN.Tween(this.camera.position).to({y: 30}, 2000)
         var camera_tween3 = new TWEEN.Tween(this.camera.position).to({z: this.camera.position.z+50}, 2000)
             .onComplete(() => {
+                this.globalRotationTween.start()
                 this.game.status = 'playing'
-                // TODO yoshi starts moving circularly
-                // Camera start moving following Yoshi
             })
         camera_tween1.start()
         camera_tween2.start()
         camera_tween3.start()
     }
-
-    world() {
-        // field
-        var loader = new THREE.TextureLoader()
-        loader.load('assets/grass.png', (texture) => {
-            var geometry = new THREE.CylinderGeometry(this.game.fieldRadius, this.game.fieldRadius, this.game.fieldLength, 64)
-            var material = new THREE.MeshBasicMaterial({map: texture})
-            var sphere = new THREE.Mesh(geometry, material);
-            sphere.position.y = -607
-            sphere.position.x = -100
-            sphere.rotation.x = 90*Math.PI/180
-            this.scene.add(sphere)
-
-            //var rotation_tween = new TWEEN.Tween(sphere.rotation).to({y: -360*Math.PI/180}, 50000).repeat(Infinity)
-            //TWEEN.add(rotation_tween)
-        })
-
-        // sky
-        var sky = new THREE.Object3D();
-        var stepAngle = Math.PI*2 / this.game.nClouds;
-        
-        for (var i = 0; i < this.game.nClouds; i++) {
-            var c = new Cloud();
-            var a = stepAngle*i;
-            var h = this.game.fieldRadius + 200
-            c.mesh.position.y = Math.sin(a)*h;
-            c.mesh.position.x = Math.cos(a)*h;
-            c.mesh.position.z = 200-Math.random()*500;
-            c.mesh.rotation.z = a + Math.PI/2;
-            var s = 1 + Math.random()*2;
-            c.mesh.scale.set(s, s, s);
-            sky.add(c.mesh);
-        }
-        sky.position.y = -610
-        sky.position.x = -100
-        this.scene.add(sky);
-        
-        //var rotation_tween = new TWEEN.Tween(sky.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
-        //TWEEN.add(rotation_tween)
-
-        this.spawnCoins()
-        this.spawnGoombas()
-        this.spawnEggs()
-    }
     
-    spawnCoins() {
-        Coin.load().then((mesh) => {
-            for (var i = 0; i < this.game.nCoins; i++) {
-                this.game.coinsArray.push(new Coin(mesh.clone()))
-            } this.randomGenerator(this.game.coinsArray, this.game.nCoins)
-        })
+    spawnCoins() {    
+        for (var i = 0; i < this.game.nCoins; i++) {
+            this.game.coinsArray.push(new Coin(this.coinMesh.clone()))
+        } this.randomGenerator(this.game.coinsArray, this.game.nCoins, 'Coins')
     }
 
     spawnGoombas() {
-        Goomba.load().then((mesh) => {
-            for (var i = 0; i < this.game.nGoombas; i++) {
-                this.game.goombasArray.push(new Goomba(mesh.clone()))
-            } this.randomGenerator(this.game.goombasArray, this.game.nGoombas)
-        })
+        for (var i = 0; i < this.game.nGoombas; i++) {
+            this.game.goombasArray.push(new Goomba(this.goombaMesh.clone()))
+        } this.randomGenerator(this.game.goombasArray, this.game.nGoombas, 'Goombas')
     } 
 
     spawnEggs() {
-        Egg.load().then((mesh) => {
-            for (var i = 0; i < this.game.nEggs; i++) {
-                this.game.eggsArray.push(new Egg(mesh.clone()))
-            } this.randomGenerator(this.game.eggsArray, this.game.nEggs)
-        })
+        for (var i = 0; i < this.game.nEggs; i++) {
+            this.game.eggsArray.push(new Egg(this.eggMesh.clone()))
+        } this.randomGenerator(this.game.eggsArray, this.game.nEggs, 'Eggs')
     }
 
-    randomGenerator(arr, n) {
+    randomGenerator(arr, n, name) {
         var object = new THREE.Object3D()
+        object.name = name
         var a = Math.PI*2/n
         var h = this.game.fieldRadius
         for (var i = 0; i < n; i++) {
@@ -181,12 +216,12 @@ export default class Game {
             o.mesh.position.x = Math.cos(a*i)*h + Math.random()*10
             o.mesh.position.y = Math.sin(a*i)*h + 8
             o.mesh.position.z = 60-Math.random()*120
+            //o.mesh.rotation.z = a*i + Math.PI/2
+            //o.mesh.rotation.y = a*i
             o.move()
             object.add(o.mesh)
         }
-        object.position.y = -607
-        object.position.x = -100
-        this.scene.add(object)
+        this.globalMesh.add(object)
     }
 
     addEnergy() {
@@ -195,73 +230,78 @@ export default class Game {
     }
 
     removeEnergy() {
-        this.game.energy -= this.game.ennemyValue;
+        this.game.energy -= this.game.enemyValue;
         this.game.energy = Math.max(0, this.game.energy);
     }
 
     updateEnergy() {
-        this.game.energy -= this.game.speed*this.deltaTime*this.game.ratioSpeedEnergy;
+        this.game.energy -= this.game.speed*this.game.ratioSpeedEnergy;
         this.game.energy = Math.max(0, this.game.energy);
         this.fieldEnergy.innerHTML = Math.floor(this.game.energy);
         
-        if (this.game.energy <1){
+        if (this.game.energy < 1) {
             this.game.status = 'gameover';
         }
     }
 
     updateDistance() {
-        this.game.distance += this.game.speed*this.deltaTime*this.game.ratioSpeedDistance;
+        this.game.distance += this.game.speed*this.game.ratioSpeedDistance;
         this.fieldDistance.innerHTML = Math.floor(this.game.distance);
     }
 
+    updateSpeed() {
+        if (this.game.speed < this.game.maxSpeed) {
+            this.game.speed += this.game.targetSpeed
+            this.game.rotationSpeed += this.game.speed*this.game.ratioRotationSpeed
+            this.game.yoshiSpeed += this.game.speed*this.game.ratioYoshiSpeed
+            this.globalRotationTween.duration(this.globalRotationTween._duration/this.game.rotationSpeed)
+        }
+    }
+
     update() {
-
-        this.newTime = new Date().getTime();
-        this.deltaTime = this.newTime-this.oldTime;
-        this.oldTime = this.newTime;
         this.yoshi.update(this.game.yoshiSpeed)
-
-        if (this.game.status == 'playing'){
-
-            // Add energy coins
-            if (Math.floor(this.game.distance)%this.game.distanceForCoinsSpawn == 0 && Math.floor(this.game.distance) > this.game.coinLastSpawn){
+        
+        if (this.game.status == 'playing') {
+            
+            // Add energy
+            if (Math.floor(this.game.distance)%this.game.distanceForEnergySpawn == 0 && Math.floor(this.game.distance) > this.game.coinLastSpawn) {
                 this.game.coinLastSpawn = Math.floor(this.game.distance);
                 // spown coins
             }
 
-            // Add ennemies
-            if (Math.floor(this.game.distance)%this.game.distanceForEnnemiesSpawn == 0 && Math.floor(this.game.distance) > this.game.ennemyLastSpawn){
-                this.game.ennemyLastSpawn = Math.floor(this.game.distance);
-                // spawn ennemies
+            // Add enemies
+            if (Math.floor(this.game.distance)%this.game.distanceForEnnemiesSpawn == 0 && Math.floor(this.game.distance) > this.game.enemyLastSpawn) {
+                this.game.enemyLastSpawn = Math.floor(this.game.distance);
+                // spawn enemies
             }
 
-            if (Math.floor(this.game.distance)%this.game.distanceForSpeedUpdate == 0 && Math.floor(this.game.distance) > this.game.speedLastUpdate){
+            // distance speed update
+            if (Math.floor(this.game.distance)%this.game.distanceForSpeedUpdate == 0 && Math.floor(this.game.distance) > this.game.speedLastUpdate) {
                 this.game.speedLastUpdate = Math.floor(this.game.distance);
-                this.game.targetBaseSpeed += this.game.incrementSpeedByTime;
-                this.game.yoshiSpeed += this.game.incrementYoshiSpeedByTime;
+                this.game.targetSpeed += this.game.incrementSpeedByDistance;
+                this.updateSpeed()
             } 
 
-            if (Math.floor(this.game.distance)%this.game.distanceForLevelUpdate == 0 && Math.floor(this.game.distance) > this.game.levelLastUpdate){
-                this.game.levelLastUpdate = Math.floor(this.game.distance);
-                this.game.level++;
-                this.game.targetBaseSpeed = this.game.initSpeed + this.game.incrementSpeedByLevel*this.game.level
-                this.fieldLevel.innerHTML = Math.floor(this.game.level);
+            // level speed update
+            if (Math.floor(this.game.distance)%this.game.distanceForLevelUpdate == 0 && Math.floor(this.game.distance) > this.game.levelLastUpdate) {
+                this.game.levelLastUpdate = Math.floor(this.game.distance)
+                this.game.level++
+                this.game.targetSpeed += this.game.incrementSpeedByLevel*this.game.level
+                this.fieldLevel.innerHTML = Math.floor(this.game.level)
             }
 
-            this.updateDistance();
-            this.updateEnergy();
-            this.game.baseSpeed += (this.game.targetBaseSpeed - this.game.baseSpeed) * 0.02;
-            this.game.speed = this.game.baseSpeed * this.game.yoshiSpeed;
+            this.updateSpeed()
+            this.updateDistance()
+            this.updateEnergy()
 
         } else if (this.game.status == 'gameover') {
             
             this.game.status = 'waiting'
             console.log('Game over!')
-            this.game.speed *= 0.0
-            this.yoshi.cry()
-            
-        } else if (this.game.status == 'waiting') {
-            
+            this.globalRotationTween.stop()
+            this.title.innerHTML = 'GAME OVER'
+            this.subtitle.innerHTML = 'Press Start to Play Again'
+            this.yoshi.cry()   
         }
     }
 }

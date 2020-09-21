@@ -9,7 +9,7 @@
 
 .header h1 {
     font-family: 'Playfair Display';
-    font-size: 4.5em;
+    font-size: 5em;
     line-height: 1;
     margin: 0;
     letter-spacing: -0.025em;
@@ -25,11 +25,11 @@
 }
 
 .header h2 {
-    font-size: 0.585em;
+    font-size: 1em;
     margin: 0.25em 0;
     white-space: nowrap;
     text-indent: 1em;
-    letter-spacing: 1em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
     color: #d6483b;
 }
@@ -109,7 +109,7 @@
 }
 
 .message--instructions {
-    font-family: "Comic Sans MS";
+    font-family: "Playfair Display";
     font-size: 0.85em;
     bottom: 6vh;
     letter-spacing: 0.2em;
