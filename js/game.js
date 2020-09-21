@@ -1,4 +1,4 @@
-import {Coin, Egg, Mushroom, Star, Goomba, Cloud, Colors} from '/js/models/objects.js'
+import {Coin, Egg, Mushroom, Goomba, Block, Cloud, Colors} from '/js/models/objects.js'
 
 class GameSettings {
 
@@ -43,12 +43,16 @@ class GameSettings {
 
         nClouds:20,
         nCoins:30,
-        nGoombas:30,
-        nEggs:5,
+        nGoombas:20,
+        nEggs:4,
+        nMushrooms: 1,
+        nBlocks: 11,
 
         coinsArray:[],
         goombasArray:[],
         eggsArray:[],
+        mushroomsArray:[],
+        blocksArray:[],
 
         title: 'Yoshi',
         subtitle: 'corre forever',
@@ -60,7 +64,6 @@ class GameSettings {
 export default class Game {
 
     game = new GameSettings().settings
-    
     title = document.getElementById("title")
     subtitle = document.getElementById('subtitle')
     level = document.getElementById('level')
@@ -70,6 +73,7 @@ export default class Game {
     fieldLevel = document.getElementById("levelValue")
     fieldEnergy = document.getElementById("energyValue")
     instruction = document.getElementById('instructions')
+    
     globalMesh = new THREE.Object3D()
     globalRotationTween = new TWEEN.Tween(this.globalMesh.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
 
@@ -90,6 +94,9 @@ export default class Game {
         Coin.load().then((mesh) => {this.coinMesh = mesh})
         Goomba.load().then((mesh) => {this.goombaMesh = mesh})
         Egg.load().then((mesh) => {this.eggMesh = mesh})
+        Mushroom.load().then((mesh) => {this.mushroomMesh = mesh})
+        Block.load().then((mesh) => {this.blockMesh = mesh})
+
         new THREE.TextureLoader().load('assets/grass.jpeg', (texture) => {
             this.worldTexture = texture
             this.init()
@@ -159,8 +166,11 @@ export default class Game {
         
         this.yoshi.play()
 
+        this.spawnEggs()
         this.spawnCoins()
         this.spawnGoombas()
+        this.spawnMushrooms()
+        this.spawnBlocks()
     }
 
     reset() {
@@ -192,18 +202,30 @@ export default class Game {
         for (var i = 0; i < this.game.nCoins; i++) {
             this.game.coinsArray.push(new Coin(this.coinMesh.clone()))
         } this.randomGenerator(this.game.coinsArray, this.game.nCoins, 'Coins')
-    }
-
-    spawnGoombas() {
-        for (var i = 0; i < this.game.nGoombas; i++) {
-            this.game.goombasArray.push(new Goomba(this.goombaMesh.clone()))
-        } this.randomGenerator(this.game.goombasArray, this.game.nGoombas, 'Goombas')
     } 
 
     spawnEggs() {
         for (var i = 0; i < this.game.nEggs; i++) {
             this.game.eggsArray.push(new Egg(this.eggMesh.clone()))
         } this.randomGenerator(this.game.eggsArray, this.game.nEggs, 'Eggs')
+    }
+
+    spawnMushrooms() {
+        for (var i = 0; i < this.game.nMushrooms; i++) {
+            this.game.mushroomsArray.push(new Mushroom(this.mushroomMesh.clone()))
+        } this.randomGenerator(this.game.mushroomsArray, this.game.nMushrooms, 'Mushroom')
+    }
+
+    spawnGoombas() {
+        for (var i = 0; i < this.game.nGoombas; i++) {
+            this.game.goombasArray.push(new Goomba(this.goombaMesh.clone()))
+        } this.randomGenerator(this.game.goombasArray, this.game.nGoombas, 'Goombas')
+    }
+
+    spawnBlocks() {
+        for (var i = 0; i < this.game.nBlocks; i++) {
+            this.game.blocksArray.push(new Block(this.blockMesh.clone()))
+        } this.randomGenerator(this.game.blocksArray, this.game.nBlocks, 'Blocks')
     }
 
     randomGenerator(arr, n, name) {

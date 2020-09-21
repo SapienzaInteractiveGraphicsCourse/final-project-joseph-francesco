@@ -39,16 +39,23 @@ export default class Yoshi {
     async load(scene) {
         var loader = new GLTFLoader()
         loader.load('/models/yoshi/scene.gltf', object => {
-            this.init(object.scene)
-            scene.add(object.scene)
+            this.mesh = new Physijs.BoxMesh(
+                new THREE.CubeGeometry(10, 30, 10),
+                new THREE.MeshPhongMaterial({
+                    opacity: 0.0,
+                    transparent: true,
+                })
+            ).add(object.scene)
+            this.init()
+            scene.add(this.mesh)
         }, null, null)
     }
 
-    init(model) {
-        this.bones(model);
+    init() {
+        this.bones();
         // position bones
         this.body.position.y = -15
-        this.body.rotation.y = 240*Math.PI/180
+        this.mesh.rotation.y = 240*Math.PI/180
         this.spine.rotation.x = 0.0
         this.head.position.set(0, 0.37, 0)
         this.head.rotation.x = 0.1
@@ -65,26 +72,25 @@ export default class Yoshi {
         this.keyboard();
     }
 
-    bones(model) {
+    bones() {
         // retrieve bones
-        this.body = model
-        this.body2 = this.body.children[0]
-        this.spine = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[4]
-        this.head = model.children[0].children[0].children[0].children[0].children[0].children[0].children[46].skeleton.bones[5]
-        this.nose = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[7]
-        this.mouth = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[8]
-        this.L_arm = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[23]
+        this.body = this.mesh.children[0]
+        this.spine = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[4]
+        this.head = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[46].skeleton.bones[5]
+        this.nose = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[7]
+        this.mouth = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[8]
+        this.L_arm = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[23]
         this.L_hand = this.L_arm.children[0].children[0].children[0]
-        this.R_arm = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[37]
+        this.R_arm = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[37]
         this.R_hand = this.R_arm.children[0].children[0].children[0]
         this.L_hand = this.L_arm.children[0].children[0].children[0]
-        this.L_leg = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[52]
+        this.L_leg = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[52]
         this.L_calf = this.L_leg.children[0]
         this.L_foot = this.L_calf.children[0]
-        this.R_leg = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[56]
+        this.R_leg = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[56]
         this.R_calf = this.R_leg.children[0]
         this.R_foot = this.R_calf.children[0]
-        this.tail = model.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[60]
+        this.tail = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[60]
     }
 
     keyboard () {
@@ -157,10 +163,10 @@ export default class Yoshi {
         
         this.yoshi.isRunning = true
 
-        var body_tween1 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y+0.5}, 200)
-        var body_tween2 = new TWEEN.Tween(this.body2.position, this.yoshiTweens).to({y: this.body2.position.y-0.5}, 200)
-        body_tween1.chain(body_tween2.chain(body_tween1))
-        this.yoshiTweens.add(body_tween1)
+        var mesh_tween1 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y+0.5}, 200)
+        var mesh_tween2 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y-0.5}, 200)
+        mesh_tween1.chain(mesh_tween2.chain(mesh_tween1))
+        this.yoshiTweens.add(mesh_tween1)
 
         var spine_tween1 = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0.5}, 400)
         this.yoshiTweens.add(spine_tween1)
@@ -227,8 +233,8 @@ export default class Yoshi {
             var head_tween = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({x: 0}, 400).repeat(1).yoyo(true)
             this.yoshiTweens.add(head_tween)
 
-            var jump_tween1 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y+jump_height}, 500).easing(TWEEN.Easing.Quadratic.Out)
-            var jump_tween2 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
+            var jump_tween1 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y+jump_height}, 500).easing(TWEEN.Easing.Quadratic.Out)
+            var jump_tween2 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
                 .onComplete(() => {
                     this.yoshi.isJumping = false
                 })
@@ -280,14 +286,14 @@ export default class Yoshi {
         this.yoshiTweens.add(foot_tween1)
         this.yoshiTweens.add(foot_tween2)
 
-        var body_tween = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y-0.2}, 200).repeat(1).yoyo(true)
-        this.yoshiTweens.add(body_tween)
+        var mesh_tween = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y-0.2}, 200).repeat(1).yoyo(true)
+        this.yoshiTweens.add(mesh_tween)
 
         var tail_tween = new TWEEN.Tween(this.tail.rotation, this.yoshiTweens).to({y: 1.0}, 200).repeat(3).yoyo(true)
         this.yoshiTweens.add(tail_tween)
         
-        var jump_tween1 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y+jump_height}, 500).easing(TWEEN.Easing.Quadratic.Out)
-        var jump_tween2 = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
+        var jump_tween1 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y+jump_height}, 500).easing(TWEEN.Easing.Quadratic.Out)
+        var jump_tween2 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
         jump_tween1.chain(jump_tween2, foot_tween3, foot_tween4)
         this.yoshiTweens.add(jump_tween1)
         
@@ -343,8 +349,8 @@ export default class Yoshi {
     }
 
     pose() {
-        var body_tween = new TWEEN.Tween(this.body.position, this.yoshiTweens).to({y: this.body.position.y}, 200)
-        this.yoshiTweens.add(body_tween)
+        var mesh_tween = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 200)
+        this.yoshiTweens.add(mesh_tween)
 
         var spine_tween = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0}, 200)
         this.yoshiTweens.add(spine_tween)
@@ -375,12 +381,14 @@ export default class Yoshi {
 
     play() {
         this.yoshi.isWaiting = true
+        if (this.yoshi.isRunning) this.yoshi.isRunning = false
+        
         this.stop()
         this.pose()
         
         this.yoshiAudio.play()
 
-        var body_tween = new TWEEN.Tween(this.body.rotation, this.yoshiTweens).to({y: 270*Math.PI/180}, 2000)
+        var mesh_tween = new TWEEN.Tween(this.mesh.rotation, this.yoshiTweens).to({y: 270*Math.PI/180}, 2000)
             .onComplete(() => {
                 this.yoshi.isWaiting = false
                 this.run()
@@ -388,7 +396,7 @@ export default class Yoshi {
             })
         var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.35}, 200).repeat(1).yoyo(true)
         this.yoshiTweens.add(nose_tween)
-        this.yoshiTweens.add(body_tween)
+        this.yoshiTweens.add(mesh_tween)
         this.start()
     }
 
@@ -407,23 +415,24 @@ export default class Yoshi {
     }
 
     moveRight = (delta) => {
-        if (this.body.position.z > this.yoshi.rightBound)
-            this.body.position.z -= delta
+        if (this.mesh.position.z > this.yoshi.rightBound){
+            this.mesh.position.z -= delta
+        }
     }
 
     moveLeft = (delta) => {
-        if (this.body.position.z < this.yoshi.leftBound)
-            this.body.position.z += delta
+        if (this.mesh.position.z < this.yoshi.leftBound)
+            this.mesh.position.z += delta
     }
 
     moveUp = (delta) => {
-        if (this.body.position.x > this.yoshi.upBound)
-            this.body.position.x -= delta
+        if (this.mesh.position.x > this.yoshi.upBound)
+            this.mesh.position.x -= delta
     }
 
     moveDown = (delta) => {
-        if (this.body.position.x < this.yoshi.downBound)
-            this.body.position.x += delta
+        if (this.mesh.position.x < this.yoshi.downBound)
+            this.mesh.position.x += delta
     }
 
     update(step) {
@@ -440,11 +449,11 @@ export default class Yoshi {
             if (this.yoshi.leftPressed)
                 this.moveLeft(this.yoshi.delta)
             
-            if (this.yoshi.upPressed)
-                this.moveUp(this.yoshi.delta)
+            //if (this.yoshi.upPressed)
+              //  this.moveUp(this.yoshi.delta)
                     
-            if (this.yoshi.downPressed)
-                this.moveDown(this.yoshi.delta)
+            //if (this.yoshi.downPressed)
+              // this.moveDown(this.yoshi.delta)
         }
 
         this.yoshiTweens.update() 
