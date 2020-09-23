@@ -16,7 +16,7 @@ export default class Yoshi {
         leftBound:80,
 
         delta:1,
-        angle:0
+        radius:0
     }
 
     constructor(scene) {
@@ -222,16 +222,16 @@ export default class Yoshi {
 
         if (this.yoshi.isRunning) {
             
-            if (this.yoshi.isPlaying) jump_height = 40
+            if (this.yoshi.isPlaying) jump_height = 60
             
-            var spine_tween = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0}, 400).repeat(1).yoyo(true)
+            var spine_tween = new TWEEN.Tween(this.spine.rotation, this.yoshiTweens).to({x: 0}, 600).repeat(1).yoyo(true)
             this.yoshiTweens.add(spine_tween)
 
-            var head_tween = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({x: 0}, 400).repeat(1).yoyo(true)
+            var head_tween = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({x: 0}, 600).repeat(1).yoyo(true)
             this.yoshiTweens.add(head_tween)
 
-            var jump_tween1 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y+jump_height}, 500).easing(TWEEN.Easing.Quadratic.Out)
-            var jump_tween2 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 300).easing(TWEEN.Easing.Quadratic.In)
+            var jump_tween1 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y+jump_height}, 600).easing(TWEEN.Easing.Quadratic.Out)
+            var jump_tween2 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 600).easing(TWEEN.Easing.Quadratic.In)
                 .onComplete(() => {
                     this.yoshi.isJumping = false
                 })
@@ -377,6 +377,8 @@ export default class Yoshi {
 
     play() {
         this.yoshi.isWaiting = true
+        this.mesh.position.y = this.yoshi.radius
+        this.mesh.rotation.y = 270*Math.PI/180
         this.stop()
         this.pose()
         
@@ -419,14 +421,7 @@ export default class Yoshi {
     update(step) {
         
         if (this.yoshi.isPlaying) {
-            //X := originX + cos(angle)*radius;
-            //Y := originY + sin(angle)*radius;
-            //console.log(-Math.sin(this.yoshi.angle)*615) // 0
-            
-            //this.mesh.position.x =
-            //console.log(-615 + Math.cos(this.yoshi.angle)*615) //-15 
-            //this.mesh.position.y = 
-            this.yoshi.angle += 1*Math.PI/180*0.001
+
             this.yoshiTweens.getAll().forEach(element => {
                 element.duration(element._duration/step)
             })

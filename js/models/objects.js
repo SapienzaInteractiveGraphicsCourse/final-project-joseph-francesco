@@ -176,7 +176,8 @@ export class Block {
 
     move () {return}
 
-    catch (){
+    catch (callback){
+        callback()
     }
 
     static async load() {
