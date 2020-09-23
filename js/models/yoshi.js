@@ -12,12 +12,11 @@ export default class Yoshi {
         leftPressed:false,
         upPressed:false,
         downPressed:false,
-        rightBound:-60,
-        leftBound:60,
-        upBound:-40,
-        downBound:50,
+        rightBound:-80,
+        leftBound:80,
 
         delta:1,
+        angle:0
     }
 
     constructor(scene) {
@@ -39,13 +38,11 @@ export default class Yoshi {
     async load(scene) {
         var loader = new GLTFLoader()
         loader.load('/models/yoshi/scene.gltf', object => {
-            this.mesh = new Physijs.BoxMesh(
-                new THREE.CubeGeometry(10, 30, 10),
-                new THREE.MeshPhongMaterial({
-                    opacity: 0.0,
-                    transparent: true,
-                })
+            this.mesh = new THREE.Mesh(
+                new THREE.CubeGeometry(20, 30, 15),
+                new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0})
             ).add(object.scene)
+            this.mesh.name = 'Yoshi'
             this.init()
             scene.add(this.mesh)
         }, null, null)
@@ -74,23 +71,23 @@ export default class Yoshi {
 
     bones() {
         // retrieve bones
-        this.body = this.mesh.children[0]
-        this.spine = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[4]
-        this.head = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[46].skeleton.bones[5]
-        this.nose = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[7]
-        this.mouth = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[8]
-        this.L_arm = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[23]
+        this.body = this.mesh.children[0].children[0]
+        this.spine = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[4]
+        this.head = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[46].skeleton.bones[5]
+        this.nose = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[7]
+        this.mouth = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[8]
+        this.L_arm = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[23]
         this.L_hand = this.L_arm.children[0].children[0].children[0]
-        this.R_arm = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[37]
+        this.R_arm = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[37]
         this.R_hand = this.R_arm.children[0].children[0].children[0]
         this.L_hand = this.L_arm.children[0].children[0].children[0]
-        this.L_leg = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[52]
+        this.L_leg = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[52]
         this.L_calf = this.L_leg.children[0]
         this.L_foot = this.L_calf.children[0]
-        this.R_leg = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[56]
+        this.R_leg = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[56]
         this.R_calf = this.R_leg.children[0]
         this.R_foot = this.R_calf.children[0]
-        this.tail = this.body.children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[60]
+        this.tail = this.mesh.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[45].skeleton.bones[60]
     }
 
     keyboard () {
@@ -304,7 +301,6 @@ export default class Yoshi {
 
     cry() {
         if (this.yoshi.isCrying || this.yoshi.isWaiting) return
-        if (this.yoshi.isJumping) this.cry()
         this.yoshi.isCrying = true
         this.yoshi.isWaiting = true
         this.yoshi.isRunning = false
@@ -381,22 +377,18 @@ export default class Yoshi {
 
     play() {
         this.yoshi.isWaiting = true
-        if (this.yoshi.isRunning) this.yoshi.isRunning = false
-        
         this.stop()
         this.pose()
         
         this.yoshiAudio.play()
-
-        var mesh_tween = new TWEEN.Tween(this.mesh.rotation, this.yoshiTweens).to({y: 270*Math.PI/180}, 2000)
+            
+        var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.35}, 500).repeat(1).yoyo(true)
             .onComplete(() => {
                 this.yoshi.isWaiting = false
                 this.run()
                 this.yoshi.isPlaying = true
             })
-        var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.35}, 200).repeat(1).yoyo(true)
         this.yoshiTweens.add(nose_tween)
-        this.yoshiTweens.add(mesh_tween)
         this.start()
     }
 
@@ -415,9 +407,8 @@ export default class Yoshi {
     }
 
     moveRight = (delta) => {
-        if (this.mesh.position.z > this.yoshi.rightBound){
+        if (this.mesh.position.z > this.yoshi.rightBound)
             this.mesh.position.z -= delta
-        }
     }
 
     moveLeft = (delta) => {
@@ -425,20 +416,17 @@ export default class Yoshi {
             this.mesh.position.z += delta
     }
 
-    moveUp = (delta) => {
-        if (this.mesh.position.x > this.yoshi.upBound)
-            this.mesh.position.x -= delta
-    }
-
-    moveDown = (delta) => {
-        if (this.mesh.position.x < this.yoshi.downBound)
-            this.mesh.position.x += delta
-    }
-
     update(step) {
         
         if (this.yoshi.isPlaying) {
+            //X := originX + cos(angle)*radius;
+            //Y := originY + sin(angle)*radius;
+            //console.log(-Math.sin(this.yoshi.angle)*615) // 0
             
+            //this.mesh.position.x =
+            //console.log(-615 + Math.cos(this.yoshi.angle)*615) //-15 
+            //this.mesh.position.y = 
+            this.yoshi.angle += 1*Math.PI/180*0.001
             this.yoshiTweens.getAll().forEach(element => {
                 element.duration(element._duration/step)
             })
@@ -448,12 +436,6 @@ export default class Yoshi {
 
             if (this.yoshi.leftPressed)
                 this.moveLeft(this.yoshi.delta)
-            
-            //if (this.yoshi.upPressed)
-              //  this.moveUp(this.yoshi.delta)
-                    
-            //if (this.yoshi.downPressed)
-              // this.moveDown(this.yoshi.delta)
         }
 
         this.yoshiTweens.update() 

@@ -28,22 +28,22 @@ class GameSettings {
 
         fieldRadius:600, 
         fieldLength:800,
-        xPosition:-100,
-        yPosition:-607,
+        yPosition:615,
 
-        coinDistanceTolerance:15,
         coinValue:3,
+        goombaValue:10,
+        eggValue: 10,
+        blockValue:20,
+        
         coinLastSpawn:0,
         distanceForEnergySpawn:100,
 
-        enemyDistanceTolerance:10,
-        enemyValue:10,
         enemyLastSpawn:0,
         distanceForEnnemiesSpawn:50,
 
         nClouds:20,
         nCoins:30,
-        nGoombas:20,
+        nGoombas:19,
         nEggs:4,
         nMushrooms: 1,
         nBlocks: 11,
@@ -53,6 +53,8 @@ class GameSettings {
         eggsArray:[],
         mushroomsArray:[],
         blocksArray:[],
+
+        collidableArray:[],
 
         title: 'Yoshi',
         subtitle: 'corre forever',
@@ -73,23 +75,21 @@ export default class Game {
     fieldLevel = document.getElementById("levelValue")
     fieldEnergy = document.getElementById("energyValue")
     instruction = document.getElementById('instructions')
-    
-    globalMesh = new THREE.Object3D()
-    globalRotationTween = new TWEEN.Tween(this.globalMesh.rotation).to({z: -360*Math.PI/180}, 50000).repeat(Infinity)
 
-    constructor(scene, camera, renderer, yoshi) {
+    constructor(scene, camera, orbit, renderer, yoshi) {
     
         this.scene = scene
         this.camera = camera
+        this.orbit = orbit
         this.renderer = renderer    
         this.yoshi = yoshi
         
         this.coinAudio = new Audio('/models/coin/sounds/catch.mp3')
-        this.goombaAudio = new Audio('/models/goomba/sounds/ouch.mp3')
+        this.ouchAudio = new Audio('/models/goomba/sounds/ouch.mp3')
         this.eggAudio = new Audio('/models/egg/sounds/eat.mp3')
-        this.coinAudio.volume = 0.05
-        this.eggAudio.volume = 0.05
-        this.goombaAudio.volume = 0.05
+        this.coinAudio.volume = 0.5
+        this.eggAudio.volume = 0.5
+        this.ouchAudio.volume = 0.5
 
         Coin.load().then((mesh) => {this.coinMesh = mesh})
         Goomba.load().then((mesh) => {this.goombaMesh = mesh})
@@ -101,16 +101,16 @@ export default class Game {
             this.worldTexture = texture
             this.init()
         })
-
+        
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case 'Enter':
                     this.play()
                     break
                 case 'p':
+                    console.log(this.scene)    
                     console.log(this.game)
                     console.log(this.yoshi)
-                    console.log(this.globalMesh)
                 default:
                     break
             }
@@ -121,10 +121,10 @@ export default class Game {
         // field
         var geometry = new THREE.CylinderGeometry(this.game.fieldRadius, this.game.fieldRadius, this.game.fieldLength, 64)
         var material = new THREE.MeshBasicMaterial({map: this.worldTexture})
-        var cylinder = new THREE.Mesh(geometry, material)
-        cylinder.rotation.x = 90*Math.PI/180
-        cylinder.name = 'Field'
-        this.globalMesh.add(cylinder)
+        var world = new THREE.Mesh(geometry, material)
+        world.rotation.x = 90*Math.PI/180
+        world.name = 'Field'
+        this.world = world
 
         // sky
         var sky = new THREE.Object3D()
@@ -142,28 +142,35 @@ export default class Game {
             var s = 1 + Math.random()*2
             c.mesh.scale.set(s, s, s)
             sky.add(c.mesh)
-        } 
-        this.globalMesh.add(sky)
-        this.globalMesh.position.x = this.game.xPosition
-        this.globalMesh.position.y = this.game.yPosition
+        }
+        this.sky = sky
     }
 
     play() {
         if (this.game.status == 'playing') return
         
         else if (this.game.status == 'init') {
+            
+            this.camera.position.set(100, this.game.fieldRadius+75, 0)
+            this.orbit.target.set(0, this.game.fieldRadius+15, 0)
+            
             this.scene.background = null
+            this.scene.add(this.world)
+            this.scene.add(this.sky)
+            
             this.instruction.style.display = 'none'
             this.level.style.visibility = 'visible'
             this.distance.style.visibility = 'visible'
             this.energy.style.visibility = 'visible'
-            this.renderer.setClearColor(Colors.blue, 1);
-            this.scene.add(this.globalMesh)
-            this.initCamera()
+            this.renderer.setClearColor(Colors.blue, 1)
+            
+            setTimeout(() => this.game.status = 'playing', 1000)
         }
         
         else if (this.game.status == 'waiting') this.reset()
         
+        this.yoshi.mesh.position.y = this.game.fieldRadius+15
+        this.yoshi.mesh.rotation.y = 270*Math.PI/180
         this.yoshi.play()
 
         this.spawnEggs()
@@ -180,22 +187,7 @@ export default class Game {
         this.fieldDistance.innerHTML = this.game.distance
         this.title.innerHTML = this.game.title
         this.subtitle.innerHTML = this.game.subtitle
-        this.globalRotationTween.delay(2000).start().onStart(() => {
-            this.game.status = 'playing'
-        })
-    }
-
-    initCamera() {
-        var camera_tween1 = new TWEEN.Tween(this.camera.position).to({x: 100}, 2000)
-        var camera_tween2 = new TWEEN.Tween(this.camera.position).to({y: 30}, 2000)
-        var camera_tween3 = new TWEEN.Tween(this.camera.position).to({z: this.camera.position.z+50}, 2000)
-            .onComplete(() => {
-                this.globalRotationTween.start()
-                this.game.status = 'playing'
-            })
-        camera_tween1.start()
-        camera_tween2.start()
-        camera_tween3.start()
+        this.game.status = 'playing'
     }
     
     spawnCoins() {    
@@ -228,31 +220,29 @@ export default class Game {
         } this.randomGenerator(this.game.blocksArray, this.game.nBlocks, 'Blocks')
     }
 
-    randomGenerator(arr, n, name) {
-        var object = new THREE.Object3D()
-        object.name = name
+    randomGenerator(arr, n) {
         var a = Math.PI*2/n
         var h = this.game.fieldRadius
         for (var i = 0; i < n; i++) {
-            var o = arr[i]
-            o.mesh.position.x = Math.cos(a*i)*h + Math.random()*10
-            o.mesh.position.y = Math.sin(a*i)*h + 8
-            o.mesh.position.z = 60-Math.random()*120
+            var m = arr[i]
+            m.mesh.position.x = Math.cos(a*i)*h + Math.random()*10
+            m.mesh.position.y = Math.sin(a*i)*h + 8
+            m.mesh.position.z = 100-Math.random()*200
             //o.mesh.rotation.z = a*i + Math.PI/2
             //o.mesh.rotation.y = a*i
-            o.move()
-            object.add(o.mesh)
+            m.move()
+            this.game.collidableArray.push(m.mesh)
+            this.scene.add(m.mesh)
         }
-        this.globalMesh.add(object)
     }
 
-    addEnergy() {
-        this.game.energy += this.game.coinValue;
+    addEnergy(value) {
+        this.game.energy += value
         this.game.energy = Math.min(this.game.energy, 100);
     }
 
-    removeEnergy() {
-        this.game.energy -= this.game.enemyValue;
+    removeEnergy(value) {
+        this.game.energy -= value
         this.game.energy = Math.max(0, this.game.energy);
     }
 
@@ -276,12 +266,87 @@ export default class Game {
             this.game.speed += this.game.targetSpeed
             this.game.rotationSpeed += this.game.speed*this.game.ratioRotationSpeed
             this.game.yoshiSpeed += this.game.speed*this.game.ratioYoshiSpeed
-            this.globalRotationTween.duration(this.globalRotationTween._duration/this.game.rotationSpeed)
+        }
+    }
+
+    updateCamera () {
+        //this.camera.lookAt(this.yoshi.mesh.position.x, 0, 0);
+    }
+
+    collisionDetection() {
+        var originPoint = this.yoshi.mesh.position.clone();
+        
+        for (var i = 0; i < this.yoshi.mesh.geometry.vertices.length; i++) {
+            
+            var localVertex = this.yoshi.mesh.geometry.vertices[i].clone()
+            var globalVertex = localVertex.applyMatrix4(this.yoshi.mesh.matrix)
+            var directionVector = globalVertex.sub(this.yoshi.mesh.position)
+
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize())
+            var collisionResults = ray.intersectObjects(this.game.collidableArray)
+            
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                
+                var collidedMesh = collisionResults[0].object
+                
+                for (var i = 0; i < this.game.collidableArray.length; i++) {
+                    if (this.game.collidableArray[i].id == collidedMesh.id) {
+                        this.game.collidableArray.splice(i, 1);
+                    }
+                }
+                
+                var catchMesh = (arr) => {
+                    for (var i = 0; i < arr.length; i++) {
+                        if (arr[i].id == collidedMesh.children[0].id) {
+                            arr[i].catch(() => {
+                                this.scene.remove(collidedMesh)
+                            })
+                            
+                        }
+                    }
+                }
+                
+                switch (collidedMesh.children[0].name) {
+                    case 'Goomba':
+                        catchMesh(this.game.goombasArray)
+                        this.removeEnergy(this.game.goombaValue)
+                        this.ouchAudio.play()
+                        break
+
+                    case 'Coin':
+                        catchMesh(this.game.coinsArray)
+                        this.addEnergy(this.game.coinValue)
+                        this.coinAudio.play()
+                        break
+                    
+                    case 'Mushroom':
+                        catchMesh(this.game.mushroomsArray)
+                        //this.yoshi.big()
+                        //this.bigAudio.play()
+                        break
+
+                    case 'Block':
+                        catchMesh(this.game.blocksArray)
+                        this.removeEnergy(this.game.blockValue)
+                        this.ouchAudio.play()
+                        break
+
+                    case 'Egg':
+                        catchMesh(this.game.eggsArray)
+                        this.addEnergy(this.game.eggValue)
+                        this.eggAudio.play()
+                        break
+
+                    default:
+                        break;
+                }
+            }
         }
     }
 
     update() {
         this.yoshi.update(this.game.yoshiSpeed)
+        this.orbit.update()
         
         if (this.game.status == 'playing') {
             
@@ -312,6 +377,8 @@ export default class Game {
                 this.fieldLevel.innerHTML = Math.floor(this.game.level)
             }
 
+            this.collisionDetection()
+            this.updateCamera()
             this.updateSpeed()
             this.updateDistance()
             this.updateEnergy()
@@ -320,7 +387,6 @@ export default class Game {
             
             this.game.status = 'waiting'
             console.log('Game over!')
-            this.globalRotationTween.stop()
             this.title.innerHTML = 'GAME OVER'
             this.subtitle.innerHTML = 'Press Start to Play Again'
             this.yoshi.cry()   

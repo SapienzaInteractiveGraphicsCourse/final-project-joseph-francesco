@@ -8,26 +8,23 @@ export var Colors = {
 export class Coin {
 
     constructor(mesh) {
-        this.mesh = new Physijs.BoxMesh(
+        this.mesh = new THREE.Mesh(
             new THREE.CubeGeometry(15, 15, 15),
-            new THREE.MeshPhongMaterial({
-                opacity: 0.0,
-                transparent: true,
-            })
+            new THREE.MeshBasicMaterial({opacity: 0.0, transparent: true})
         ).add(mesh)
+        this.id = mesh.id
     }
 
     move() {
         this.rotation_tween = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+3.14}, 1000).repeat(Infinity).start()
     }
 
-    catch (scene, audio) {
-        audio.play()
+    catch (callback) {
         TWEEN.remove(this.rotation_tween)
         new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+3.14}, 200).repeat(3).start()
-        new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y+30}, 600)
-            .easing(TWEEN.Easing.Quadratic.Out).onComplete(() => {
-                scene.remove(this.mesh)
+        new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y+30}, 600).easing(TWEEN.Easing.Quadratic.Out).start()
+            .onComplete(() => {
+                callback()
             }).start()
     }
 
@@ -48,13 +45,11 @@ export class Coin {
 export class Egg {
 
     constructor(mesh) {
-        this.mesh = new Physijs.BoxMesh(
-            new THREE.CubeGeometry(12, 12, 12),
-            new THREE.MeshPhongMaterial({
-                opacity: 0.0,
-                transparent: true,
-            })
+        this.mesh = new THREE.Mesh(
+            new THREE.CubeGeometry(15, 15, 15),
+            new THREE.MeshBasicMaterial({opacity: 0.0, transparent: true})
         ).add(mesh)
+        this.id = mesh.id
     }
 
     move() {
@@ -62,14 +57,13 @@ export class Egg {
         this.rotation_tween2 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+6.28}, 2000).repeat(Infinity).start()
     }
 
-    catch (scene, audio) {
-        audio.play()
+    catch (callback) {
         TWEEN.remove(this.rotation_tween1)
         TWEEN.remove(this.rotation_tween2)
         new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+6.28}, 200).repeat(2).start()
         new TWEEN.Tween(this.mesh.scale).to({x: 0, y:0, z:0}, 300)
             .onComplete(() => {
-                scene.remove(this.mesh)
+                callback()
             }).start()
     }
 
@@ -90,40 +84,30 @@ export class Egg {
 export class Goomba {
 
     constructor(mesh) {
-        this.mesh = new Physijs.BoxMesh(
+        this.mesh = new THREE.Mesh(
             new THREE.CubeGeometry(15, 15, 15),
-            new THREE.MeshPhongMaterial({
-                opacity: 0.0,
-                transparent: true,
-            })
+            new THREE.MeshBasicMaterial({opacity: 0.0, transparent: true})
         ).add(mesh)
+        this.id = mesh.id
     }
 
     move() {
-        let vel = 500-Math.random()*200
-        this.move_tween1 = new TWEEN.Tween(this.mesh.position).to({z: this.mesh.position.z+30}, vel)
-        var move_tween2 = new TWEEN.Tween(this.mesh.position).to({z: this.mesh.position.z-30}, vel*2)
-        var move_tween3 = new TWEEN.Tween(this.mesh.position).to({z: this.mesh.position.z}, vel)
-        this.move_tween1.chain(move_tween2.chain(move_tween3.chain(this.move_tween1)))
         this.rotation_tween1 = new TWEEN.Tween(this.mesh.rotation).to({z: this.mesh.rotation.z+0.4}, 500)
         var rotation_tween2 = new TWEEN.Tween(this.mesh.rotation).to({z: this.mesh.rotation.z}, 500)
         this.rotation_tween1.chain(rotation_tween2.chain(this.rotation_tween1))
         this.rotation_tween3 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+0.4}, 500)
         var rotation_tween4 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y}, 500)
         this.rotation_tween3.chain(rotation_tween4.chain(this.rotation_tween3))
-        this.move_tween1.start(Math.random()*1000)
         this.rotation_tween1.start()
         this.rotation_tween3.start()
     }
 
-    catch(scene, audio) {
-        audio.play()
-        TWEEN.remove(this.move_tween1)
+    catch(callback) {
         TWEEN.remove(this.rotation_tween1)
         TWEEN.remove(this.rotation_tween3)
         new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y}, 500)
             .onComplete(() => {
-                scene.remove(this.mesh)
+                callback()
             }).start()
     }
 
@@ -145,13 +129,11 @@ export class Goomba {
 export class Mushroom {
 
     constructor(mesh) {
-        this.mesh = new Physijs.BoxMesh(
+        this.mesh = new THREE.Mesh(
             new THREE.CubeGeometry(8, 8, 8),
-            new THREE.MeshPhongMaterial({
-                opacity: 0.0,
-                transparent: true,
-            })
+            new THREE.MeshBasicMaterial({opacity: 0.0, transparent: true})
         ).add(mesh)
+        this.id = mesh.id
     }
 
     move() {
@@ -161,9 +143,11 @@ export class Mushroom {
         this.jump_tween1.start()
     }
 
-    catch (scene) {
+    catch (callback) {
         TWEEN.remove(this.jump_tween1)
-        scene.remove(this.mesh)
+            .onComplete(() => {
+                callback()
+            }).start()
     }
 
     static async load() {
@@ -183,19 +167,16 @@ export class Mushroom {
 export class Block {
 
     constructor(mesh) {
-        this.mesh = new Physijs.BoxMesh(
-            new THREE.CubeGeometry(15, 15, 15),
-            new THREE.MeshPhongMaterial({
-                opacity: 0.0,
-                transparent: true,
-            })
+        this.mesh = new THREE.Mesh(
+            new THREE.CubeGeometry(18, 18, 18),
+            new THREE.MeshBasicMaterial({opacity: 0.0, transparent: true})
         ).add(mesh)
+        this.id = mesh.id
     }
 
     move () {return}
 
-    catch (scene) {
-        scene.remove(this.mesh)
+    catch (){
     }
 
     static async load() {
@@ -217,11 +198,9 @@ export class Cloud {
     
     constructor() {
         this.mesh = new THREE.Object3D()
-        this.mesh.name = "cloud"
+        this.mesh.name = "Cloud"
         var geom = new THREE.CubeGeometry(20, 20, 20)
-        var mat = new THREE.MeshPhongMaterial({
-            color: Colors.white,
-        })
+        var mat = new THREE.MeshPhongMaterial({color: Colors.white})
 
         var nBlocs = 3 + Math.floor(Math.random() * 3)
         for (var i = 0; i < nBlocs; i++) {
