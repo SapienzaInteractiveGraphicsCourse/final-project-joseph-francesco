@@ -7,15 +7,16 @@ export default class Yoshi {
         isCrying:false,
         isPlaying:false,
         isWaiting:false,
+        isBig:false,
 
         rightPressed:false,
         leftPressed:false,
         upPressed:false,
         downPressed:false,
-        rightBound:-80,
-        leftBound:80,
+        rightBound:-90,
+        leftBound:90,
 
-        delta:1,
+        delta:1.5,
         radius:0
     }
 
@@ -24,13 +25,15 @@ export default class Yoshi {
         this.yoshiTweens = new TWEEN.Group()
         
         this.jumpAudio1 = new Audio('/models/yoshi/sounds/jump1.mp3')
-        this.jumpAudio1.volume = 0.5
         this.jumpAudio2 = new Audio('/models/yoshi/sounds/jump2.mp3')
-        this.jumpAudio2.volume = 0.5
         this.yoshiAudio = new Audio('/models/yoshi/sounds/yoshi.mp3')
-        this.yoshiAudio.volume = 0.5
         this.cryAudio = new Audio('/models/yoshi/sounds/lose.mp3')
+        this.bigAudio = new Audio('/models/yoshi/sounds/big.mp3')
+        this.jumpAudio1.volume = 0.5
+        this.jumpAudio2.volume = 0.5
+        this.yoshiAudio.volume = 0.5
         this.cryAudio.volume = 0.5
+        this.bigAudio.volume = 0.1
 
         this.load(scene)
     }
@@ -94,7 +97,7 @@ export default class Yoshi {
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case 'r' || 'R': 
-                    if (!this.yoshi.isPlaying) this.run()
+                    if (!this.yoshi.isPlaying || this.yoshi.isWaiting) this.run()
                     break
 
                 case ' ':
@@ -299,12 +302,11 @@ export default class Yoshi {
         return
     }
 
-    cry() {
+    cry(callback) {
         if (this.yoshi.isCrying || this.yoshi.isWaiting) return
         this.yoshi.isCrying = true
         this.yoshi.isWaiting = true
         this.yoshi.isRunning = false
-        this.yoshi.isPlaying = false
         this.yoshi.rightPressed = false
         this.yoshi.leftPressed = false
         this.yoshi.upPressed = false
@@ -321,7 +323,7 @@ export default class Yoshi {
         var head_tween7 = new TWEEN.Tween(this.head.rotation, this.yoshiTweens).to({y: 0.0}, 200)
             .onComplete(() => {
                 this.yoshi.isCrying = false
-                this.yoshi.isWaiting = false
+                callback()
             })
         head_tween1.chain(head_tween2.chain(head_tween3.chain(head_tween4.chain(head_tween5.chain(head_tween6.chain(head_tween7))))))
         this.yoshiTweens.add(head_tween1)
@@ -341,6 +343,38 @@ export default class Yoshi {
 
         this.cryAudio.play()
 
+        this.start()
+    }
+
+    big() {
+        if (this.yoshi.isBig) return
+        if (this.yoshi.isJumping) setInterval(() => {}, 500)
+        this.yoshi.isBig = true
+        this.bigAudio.play()
+        // bigger
+        var big_tween1_b = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 1.7, y: 1.7, z: 1.7}, 100)
+        var big_tween2_b = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 1.2, y: 1.2, z: 1.2}, 100)
+        var big_tween3_b = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 2.5, y: 2.5, z: 2.5}, 100)
+        var big_tween4_b = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 2.2, y: 2.2, z: 2.2}, 100)
+        var big_tween5_b = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 2.7, y: 2.7, z: 2.7}, 100)
+        var y_tween = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y+20}, 500)
+        big_tween1_b.chain(big_tween2_b.chain(big_tween3_b.chain(big_tween4_b.chain(big_tween5_b))))
+        this.yoshiTweens.add(y_tween)
+        this.yoshiTweens.add(big_tween1_b)
+
+        // smaller
+        var big_tween1_s = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 2.2, y: 2.2, z: 2.2}, 100).delay(10000)
+        var big_tween2_s = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 2.5, y: 2.5, z: 2.5}, 100)
+        var big_tween3_s = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 1.5, y: 1.5, z: 1.5}, 100)
+        var big_tween4_s = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 1.7, y: 1.7, z: 1.7}, 100)
+        var big_tween5_s = new TWEEN.Tween(this.mesh.scale, this.yoshiTweens).to({x: 1, y: 1, z: 1}, 100)
+        var y_tween2 = new TWEEN.Tween(this.mesh.position, this.yoshiTweens).to({y: this.mesh.position.y}, 500).delay(10000)
+            .onComplete(() => {
+                this.yoshi.isBig = false
+            })
+        big_tween1_s.chain(big_tween2_s.chain(big_tween3_s.chain(big_tween4_s.chain(big_tween5_s))))
+        this.yoshiTweens.add(y_tween2)
+        this.yoshiTweens.add(big_tween1_s)
         this.start()
     }
 
@@ -375,20 +409,21 @@ export default class Yoshi {
         this.start();
     }
 
-    play() {
+    play(callback) {
         this.yoshi.isWaiting = true
         this.mesh.position.y = this.yoshi.radius
         this.mesh.rotation.y = 270*Math.PI/180
-        this.stop()
-        this.pose()
+        
+        if (!this.yoshi.isRunning) this.pose()
         
         this.yoshiAudio.play()
             
-        var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.35}, 500).repeat(1).yoyo(true)
+        var nose_tween = new TWEEN.Tween(this.nose.position, this.yoshiTweens).to({y: 0.35}, 400).repeat(1).yoyo(true)
             .onComplete(() => {
                 this.yoshi.isWaiting = false
-                this.run()
+                if (!this.yoshi.isRunning) this.run()
                 this.yoshi.isPlaying = true
+                callback()
             })
         this.yoshiTweens.add(nose_tween)
         this.start()
@@ -426,10 +461,10 @@ export default class Yoshi {
                 element.duration(element._duration/step)
             })
 
-            if (this.yoshi.rightPressed)
+            if (this.yoshi.rightPressed && !this.yoshi.isWaiting)
                 this.moveRight(this.yoshi.delta)
 
-            if (this.yoshi.leftPressed)
+            if (this.yoshi.leftPressed && !this.yoshi.isWaiting)
                 this.moveLeft(this.yoshi.delta)
         }
 

@@ -21,7 +21,7 @@ class GameSettings {
         
         distance:0,
         ratioSpeedDistance:.25,
-        energy:100,
+        energy:10,
         ratioSpeedEnergy:.01,
 
         level:1,
@@ -41,15 +41,22 @@ class GameSettings {
         
         coinSpawn:false,
         eggSpawn:false,
+        mushroomSpawn:false,
         goombasSpawn:false,
         blockSpawn:false,
 
         nClouds:20,
         nCoins:30,
+        nEggs:10,
+        nMushrooms: 2,
         nGoombas:20,
-        nEggs:4,
-        nMushrooms: 1,
         nBlocks: 11,
+
+        minCoins:15,
+        minEggs:5,
+        minMushrooms: 1,
+        minGommbas:8,
+        minBlocks:4,
 
         coinsArray:[],
         goombasArray:[],
@@ -88,13 +95,19 @@ export default class Game {
 
         yoshi.yoshi.radius = this.game.yPosition
         
+        this.gameAudio = new Audio('assets/yoshi_circuit.mp3')
         this.coinAudio = new Audio('/models/coin/sounds/catch.mp3')
         this.ouchAudio = new Audio('/models/goomba/sounds/ouch.mp3')
         this.eggAudio = new Audio('/models/egg/sounds/eat.mp3')
+        this.destroyBlockAudio = new Audio('/models/block/sounds/destroy.mp3')
+        this.smashGoombaAudio = new Audio('/models/goomba/sounds/destroy.mp3')
         
-        this.coinAudio.volume = 0.5
-        this.eggAudio.volume = 0.5
+        this.coinAudio.volume = 0.3
         this.ouchAudio.volume = 0.5
+        this.eggAudio.volume = 0.5
+        this.destroyBlockAudio.volume = 0.4
+        this.smashGoombaAudio.volume = 0.1
+        this.gameAudio.volume = 0.2
 
         Coin.load().then((mesh) => {this.coinMesh = mesh})
         Goomba.load().then((mesh) => {this.goombaMesh = mesh})
@@ -159,12 +172,13 @@ export default class Game {
     }
 
     play() {
+        if (this.yoshi.yoshi.isJumping) return
         if (this.game.status == 'playing') return
         
         else if (this.game.status == 'init') {
-        
-            this.camera.position.set(this.game.cameraOffsetX, this.game.fieldRadius + 67.42, 0)
+            
             this.scene.background = null
+            this.camera.position.set(this.game.cameraOffsetX, this.game.fieldRadius + 67.42, 0)
             this.scene.add(this.globalMesh)
             
             this.instruction.style.display = 'none'
@@ -172,15 +186,15 @@ export default class Game {
             this.distance.style.visibility = 'visible'
             this.energy.style.visibility = 'visible'
             this.renderer.setClearColor(Colors.blue, 1)
-            
-            setTimeout(() => this.game.status = 'playing', 1000)
         }
         
         else if (this.game.status == 'waiting') this.reset()
         
-        this.yoshi.play()
+        this.yoshi.play(() => {
+            this.game.status = 'playing'
+            this.gameAudio.play()
+        })
         this.camera.lookAt(this.yoshi.mesh.position)
-
         this.spawnEggs()
         this.spawnCoins()
         this.spawnGoombas()
@@ -189,13 +203,15 @@ export default class Game {
     }
 
     reset() {
+        this.enemyMesh.children.length = 0
+        this.globalMesh.rotation.z = 0
         this.game = new GameSettings().settings
         this.fieldEnergy.innerHTML = this.game.energy
         this.fieldLevel.innerHTML = this.game.level
         this.fieldDistance.innerHTML = this.game.distance
         this.title.innerHTML = this.game.title
         this.subtitle.innerHTML = this.game.subtitle
-        this.game.status = 'playing'
+        this.yoshi.mesh.position.z = 0
     }
     
     spawnCoins() {    
@@ -230,38 +246,21 @@ export default class Game {
 
     randomGenerator(arr, n) {
         var a = Math.PI*2/n
-        var h = this.game.fieldRadius+20
+        var h = this.game.fieldRadius + 10
         for (var i = 0; i < n; i++) {
             var o = arr[i]
-            var x_pos = Math.cos(a*i)*h + Math.random()*10
-            var y_pos = Math.sin(a*i)*h + 8
-            // o.mesh.rotation.x = Math.PI
-            // o.mesh.rotation.y = Math.PI
-            // o.mesh.rotation.z = Math.PI
-            o.mesh.position.x = x_pos
-            o.mesh.position.y = y_pos
-            o.mesh.position.z = 60-Math.random()*120
-            // o.mesh.children[0].children[0].rotation.x = Math.atan(y_pos/x_pos)
-            // const rot_val = Math.PI/2
-            const rot_val = a*i-Math.PI
-            // const rot_val = Math.sin(Math.atan(y_pos/x_pos)*2)
-            o.mesh.children[0].children[0].children[0].children[0].rotation.x = -rot_val
-            // o.mesh.children[0].children[0].rotation.x = Math.atan(y_pos/x_pos)
-            //console.log('the o value, ', rot_val, ' when i is  ',i)
-            //o.mesh.rotation.z = (Math.tan(y_pos/x_pos)*180)/Math.PI
-            //var a = stepAngle*i
-            //c.mesh.rotation.z = a + Math.PI/2
-            //o.mesh.rotation.y = a*i
+            o.mesh.position.x = Math.cos(a*i)*h
+            o.mesh.position.y = Math.sin(a*i)*h 
+            o.mesh.position.z = 100-Math.random()*200
+            o.mesh.rotation.z = a*i-Math.PI/2
             o.move()
             this.game.collidableArray.push(o.mesh)
-            //this.scene.add(o.mesh)
             this.enemyMesh.add(o.mesh)
         }
     }
 
     addEnergy(value) {
         this.game.energy += value
-        //this.game.energy = Math.min(this.game.energy, 100);
     }
 
     removeEnergy(value) {
@@ -276,6 +275,8 @@ export default class Game {
         
         if (this.game.energy < 1) {
             this.game.status = 'gameover';
+            this.gameAudio.pause()
+            this.gameAudio.currentTime = 0
         }
     }
 
@@ -334,8 +335,13 @@ export default class Game {
                 switch (collidedMesh.children[0].name) {
                     case 'Goomba':
                         catchMesh(this.game.goombasArray)
-                        this.removeEnergy(this.game.goombaValue)
-                        this.ouchAudio.play()
+                        if (this.yoshi.yoshi.isBig){
+                            this.smashGoombaAudio.play() 
+                            this.addEnergy(this.game.goombaValue)
+                        } else {
+                            this.removeEnergy(this.game.goombaValue)
+                            this.ouchAudio.play()
+                        }
                         break
 
                     case 'Coin':
@@ -346,14 +352,18 @@ export default class Game {
                     
                     case 'Mushroom':
                         catchMesh(this.game.mushroomsArray)
-                        //this.yoshi.big()
-                        //this.bigAudio.play()
+                        this.yoshi.big()
                         break
 
                     case 'Block':
                         catchMesh(this.game.blocksArray)
-                        this.removeEnergy(this.game.blockValue)
-                        this.ouchAudio.play()
+                        if (this.yoshi.yoshi.isBig){
+                            this.destroyBlockAudio.play()
+                            this.addEnergy(this.game.blockValue)
+                        } else {
+                            this.removeEnergy(this.game.blockValue)
+                            this.ouchAudio.play()
+                        }
                         break
 
                     case 'Egg':
@@ -376,26 +386,32 @@ export default class Game {
         if (this.game.status == 'playing') {
 
             // Add energy
-            if (this.game.coinsArray.length < 10 && !this.game.coinSpawn) {
+            if (this.game.coinsArray.length < this.game.minCoins && !this.game.coinSpawn) {
                 this.game.coinSpawn = true
                 this.spawnCoins()
                 this.game.coinSpawn = false
             }
 
-            if (this.game.eggsArray.length < 1 && !this.game.eggSpawn) {
+            if (this.game.eggsArray.length < this.game.minEggs && !this.game.eggSpawn) {
                 this.game.eggSpawn = true
                 this.spawnEggs()
                 this.game.eggSpawn = false
             }
 
+            if (this.game.mushroomsArray.length < this.game.minMushrooms && !this.game.mushroomSpawn) {
+                this.game.mushroomSpawn = true
+                this.spawnMushrooms()
+                this.game.mushroomSpawn = false
+            }
+
             // Add enemies
-            if (this.game.goombasArray.length < 5 && !this.game.goombasSpawn) {
+            if (this.game.goombasArray.length < this.game.minGommbas && !this.game.goombasSpawn) {
                 this.game.goombasSpawn = true
                 this.spawnGoombas()
                 this.game.goombasSpawn = false
             }
 
-            if (this.game.blocksArray.length < 5 && !this.game.blockSpawn) {
+            if (this.game.blocksArray.length < this.game.minBlocks && !this.game.blockSpawn) {
                 this.game.blockSpawn = true
                 this.spawnBlocks()
                 this.game.blockSpawn = false
@@ -405,7 +421,6 @@ export default class Game {
             if (Math.floor(this.game.distance)%this.game.distanceForSpeedUpdate == 0 && Math.floor(this.game.distance) > this.game.speedLastUpdate) {
                 this.game.speedLastUpdate = Math.floor(this.game.distance);
                 this.game.targetSpeed += this.game.incrementSpeedByDistance;
-                this.updateSpeed()
             } 
 
             // level speed update
@@ -424,11 +439,12 @@ export default class Game {
 
         } else if (this.game.status == 'gameover') {
             
-            this.game.status = 'waiting'
-            console.log('Game over!')
-            this.title.innerHTML = 'GAME OVER'
-            this.subtitle.innerHTML = 'Press Start to Play Again'
-            this.yoshi.cry()   
+            this.yoshi.cry(() => {
+                console.log('Game over!')
+                this.title.innerHTML = 'GAME OVER'
+                this.subtitle.innerHTML = 'Press Start to Play Again'
+                this.game.status = 'waiting'
+            })
         }
     }
 }

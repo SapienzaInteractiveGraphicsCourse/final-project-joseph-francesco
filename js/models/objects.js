@@ -16,13 +16,13 @@ export class Coin {
     }
 
     move() {
-        this.rotation_tween = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+3.14}, 1000).repeat(Infinity).start()
+        this.rotation_tween = new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y+3.14}, 1000).repeat(Infinity).start()
     }
 
     catch (callback) {
         TWEEN.remove(this.rotation_tween)
-        new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+3.14}, 200).repeat(3).start()
-        new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y+30}, 600).easing(TWEEN.Easing.Quadratic.Out).start()
+        new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y+3.14}, 200).repeat(3).start()
+        new TWEEN.Tween(this.mesh.children[0].position).to({y: this.mesh.children[0].position.y+30}, 600).easing(TWEEN.Easing.Quadratic.Out).start()
             .onComplete(() => {
                 callback()
             }).start()
@@ -53,14 +53,14 @@ export class Egg {
     }
 
     move() {
-        this.rotation_tween1 = new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y+1}, 300).repeat(Infinity).yoyo(true).easing(TWEEN.Easing.Quadratic.Out).start()
-        this.rotation_tween2 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+6.28}, 2000).repeat(Infinity).start()
+        this.rotation_tween1 = new TWEEN.Tween(this.mesh.children[0].position).to({y: this.mesh.children[0].position.y+1}, 300).repeat(Infinity).yoyo(true).easing(TWEEN.Easing.Quadratic.Out).start()
+        this.rotation_tween2 = new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y+6.28}, 2000).repeat(Infinity).start()
     }
 
     catch (callback) {
         TWEEN.remove(this.rotation_tween1)
         TWEEN.remove(this.rotation_tween2)
-        new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+6.28}, 200).repeat(2).start()
+        new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y+6.28}, 200).repeat(2).start()
         new TWEEN.Tween(this.mesh.scale).to({x: 0, y:0, z:0}, 300)
             .onComplete(() => {
                 callback()
@@ -92,19 +92,22 @@ export class Goomba {
     }
 
     move() {
-        this.rotation_tween1 = new TWEEN.Tween(this.mesh.rotation).to({z: this.mesh.rotation.z+0.4}, 500)
-        var rotation_tween2 = new TWEEN.Tween(this.mesh.rotation).to({z: this.mesh.rotation.z}, 500)
+        this.rotation_tween1 = new TWEEN.Tween(this.mesh.children[0].rotation).to({z: this.mesh.children[0].rotation.z+0.4}, 500)
+        var rotation_tween2 = new TWEEN.Tween(this.mesh.children[0].rotation).to({z: this.mesh.children[0].rotation.z}, 500)
         this.rotation_tween1.chain(rotation_tween2.chain(this.rotation_tween1))
-        this.rotation_tween3 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y+0.4}, 500)
-        var rotation_tween4 = new TWEEN.Tween(this.mesh.rotation).to({y: this.mesh.rotation.y}, 500)
+        this.rotation_tween3 = new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y+0.4}, 500)
+        var rotation_tween4 = new TWEEN.Tween(this.mesh.children[0].rotation).to({y: this.mesh.children[0].rotation.y}, 500)
+        this.move_tween1 = new TWEEN.Tween(this.mesh.position).to({z: this.mesh.position.z+Math.random()*15+1}, 500).repeat(Infinity).yoyo(true)
         this.rotation_tween3.chain(rotation_tween4.chain(this.rotation_tween3))
         this.rotation_tween1.start()
         this.rotation_tween3.start()
+        this.move_tween1.delay(Math.random()*500+1).start()
     }
 
     catch(callback) {
         TWEEN.remove(this.rotation_tween1)
         TWEEN.remove(this.rotation_tween3)
+        TWEEN.remove(this.move_tween1)
         new TWEEN.Tween(this.mesh.position).to({y: this.mesh.position.y}, 500)
             .onComplete(() => {
                 callback()
@@ -137,17 +140,15 @@ export class Mushroom {
     }
 
     move() {
-        this.jump_tween1 = new TWEEN.Tween(this.mesh.position).to({y:this.mesh.position.y+3}, 350).easing(TWEEN.Easing.Quadratic.Out).delay(200)
-        var jump_tween2 = new TWEEN.Tween(this.mesh.position).to({y:this.mesh.position.y}, 350).easing(TWEEN.Easing.Quadratic.In)
+        this.jump_tween1 = new TWEEN.Tween(this.mesh.children[0].position).to({y: this.mesh.children[0].position.y+10}, 350).easing(TWEEN.Easing.Quadratic.Out).delay(200)
+        var jump_tween2 = new TWEEN.Tween(this.mesh.children[0].position).to({y: this.mesh.children[0].position.y}, 350).easing(TWEEN.Easing.Quadratic.In)
         this.jump_tween1.chain(jump_tween2.chain(this.jump_tween1))
         this.jump_tween1.start()
     }
 
     catch (callback) {
         TWEEN.remove(this.jump_tween1)
-            .onComplete(() => {
-                callback()
-            }).start()
+        callback()
     }
 
     static async load() {
@@ -155,8 +156,8 @@ export class Mushroom {
         return new Promise((resolve, reject) => {
             loader.load('/models/mushroom/scene.gltf', object => {
                 var mesh = object.scene
-                mesh.scale.set(4, 4, 4)
-                mesh.rotation.y = 1.6
+                mesh.scale.set(5, 5, 5)
+                mesh.position.y = -5
                 mesh.name = 'Mushroom'
                 resolve(object.scene)
             }, null, reject)
@@ -186,7 +187,7 @@ export class Block {
             loader.load('/models/block/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(0.15, 0.15, 0.15)
-                mesh.position.y -= 8
+                mesh.position.y -=10
                 mesh.position.z -= 2
                 mesh.name = 'Block'
                 resolve(object.scene)
