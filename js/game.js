@@ -34,7 +34,7 @@ class GameSettings {
         goombaValue:10,
         eggValue: 10,
         blockValue:20,
-        
+
         coinLastSpawn:0,
         distanceForEnergySpawn:100,
 
@@ -81,7 +81,7 @@ export default class Game {
         this.scene = scene
         this.camera = camera
         this.orbit = orbit
-        this.renderer = renderer    
+        this.renderer = renderer
         this.yoshi = yoshi
         
         this.coinAudio = new Audio('/models/coin/sounds/catch.mp3')
@@ -101,14 +101,14 @@ export default class Game {
             this.worldTexture = texture
             this.init()
         })
-        
+
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case 'Enter':
                     this.play()
                     break
                 case 'p':
-                    console.log(this.scene)    
+                    console.log(this.scene)
                     console.log(this.game)
                     console.log(this.yoshi)
                 default:
@@ -150,25 +150,25 @@ export default class Game {
         if (this.game.status == 'playing') return
         
         else if (this.game.status == 'init') {
-            
+
             this.camera.position.set(100, this.game.fieldRadius+75, 0)
             this.orbit.target.set(0, this.game.fieldRadius+15, 0)
-            
+
             this.scene.background = null
             this.scene.add(this.world)
             this.scene.add(this.sky)
-            
+
             this.instruction.style.display = 'none'
             this.level.style.visibility = 'visible'
             this.distance.style.visibility = 'visible'
             this.energy.style.visibility = 'visible'
             this.renderer.setClearColor(Colors.blue, 1)
-            
+
             setTimeout(() => this.game.status = 'playing', 1000)
         }
         
         else if (this.game.status == 'waiting') this.reset()
-        
+
         this.yoshi.mesh.position.y = this.game.fieldRadius+15
         this.yoshi.mesh.rotation.y = 270*Math.PI/180
         this.yoshi.play()
@@ -222,17 +222,31 @@ export default class Game {
 
     randomGenerator(arr, n) {
         var a = Math.PI*2/n
-        var h = this.game.fieldRadius
+        var h = this.game.fieldRadius+20
         for (var i = 0; i < n; i++) {
-            var m = arr[i]
-            m.mesh.position.x = Math.cos(a*i)*h + Math.random()*10
-            m.mesh.position.y = Math.sin(a*i)*h + 8
-            m.mesh.position.z = 100-Math.random()*200
-            //o.mesh.rotation.z = a*i + Math.PI/2
+            var o = arr[i]
+            var x_pos = Math.cos(a*i)*h + Math.random()*10
+            var y_pos = Math.sin(a*i)*h + 8
+            // o.mesh.rotation.x = Math.PI
+            // o.mesh.rotation.y = Math.PI
+            // o.mesh.rotation.z = Math.PI
+            o.mesh.position.x = x_pos
+            o.mesh.position.y = y_pos
+            o.mesh.position.z = 60-Math.random()*120
+            // o.mesh.children[0].children[0].rotation.x = Math.atan(y_pos/x_pos)
+            // const rot_val = Math.PI/2
+            const rot_val = a*i-Math.PI
+            // const rot_val = Math.sin(Math.atan(y_pos/x_pos)*2)
+            o.mesh.children[0].children[0].children[0].children[0].rotation.x = -rot_val
+            // o.mesh.children[0].children[0].rotation.x = Math.atan(y_pos/x_pos)
+            console.log('the o value, ', rot_val, ' when i is  ',i)
+            //o.mesh.rotation.z = (Math.tan(y_pos/x_pos)*180)/Math.PI
+            //var a = stepAngle*i
+            //c.mesh.rotation.z = a + Math.PI/2
             //o.mesh.rotation.y = a*i
-            m.move()
-            this.game.collidableArray.push(m.mesh)
-            this.scene.add(m.mesh)
+            o.move()
+            this.game.collidableArray.push(o.mesh)
+            this.scene.add(o.mesh)
         }
     }
 
@@ -275,37 +289,37 @@ export default class Game {
 
     collisionDetection() {
         var originPoint = this.yoshi.mesh.position.clone();
-        
+
         for (var i = 0; i < this.yoshi.mesh.geometry.vertices.length; i++) {
-            
+
             var localVertex = this.yoshi.mesh.geometry.vertices[i].clone()
             var globalVertex = localVertex.applyMatrix4(this.yoshi.mesh.matrix)
             var directionVector = globalVertex.sub(this.yoshi.mesh.position)
 
             var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize())
             var collisionResults = ray.intersectObjects(this.game.collidableArray)
-            
+
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-                
+
                 var collidedMesh = collisionResults[0].object
-                
+
                 for (var i = 0; i < this.game.collidableArray.length; i++) {
                     if (this.game.collidableArray[i].id == collidedMesh.id) {
                         this.game.collidableArray.splice(i, 1);
                     }
                 }
-                
+
                 var catchMesh = (arr) => {
                     for (var i = 0; i < arr.length; i++) {
                         if (arr[i].id == collidedMesh.children[0].id) {
                             arr[i].catch(() => {
                                 this.scene.remove(collidedMesh)
                             })
-                            
+
                         }
                     }
                 }
-                
+
                 switch (collidedMesh.children[0].name) {
                     case 'Goomba':
                         catchMesh(this.game.goombasArray)
@@ -318,7 +332,7 @@ export default class Game {
                         this.addEnergy(this.game.coinValue)
                         this.coinAudio.play()
                         break
-                    
+
                     case 'Mushroom':
                         catchMesh(this.game.mushroomsArray)
                         //this.yoshi.big()
@@ -347,7 +361,7 @@ export default class Game {
     update() {
         this.yoshi.update(this.game.yoshiSpeed)
         this.orbit.update()
-        
+
         if (this.game.status == 'playing') {
             
             // Add energy

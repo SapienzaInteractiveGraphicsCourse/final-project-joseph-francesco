@@ -687,12 +687,21 @@ ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
 }
 
 Coin = function(){
-    var geom = new THREE.TetrahedronGeometry(5,0);
+    // var geom = new THREE.TetrahedronGeometry(5,0);
+    // var mat = new THREE.MeshPhongMaterial({
+    //     color:0x009999,
+    //     shininess:0,
+    //     specular:0xffffff,
+    //
+    //     shading:THREE.FlatShading
+    // });
+
+
+    var geom = new THREE.TetrahedronGeometry(8,2);
     var mat = new THREE.MeshPhongMaterial({
-        color:0x009999,
+        color:Colors.red,
         shininess:0,
         specular:0xffffff,
-
         shading:THREE.FlatShading
     });
     this.mesh = new THREE.Mesh(geom,mat);
@@ -706,7 +715,7 @@ CoinsHolder = function (nCoins){
     this.coinsInUse = [];
     this.coinsPool = [];
     for (var i=0; i<nCoins; i++){
-        var coin = new Coin();
+        var coin = new CoinN();
         this.coinsPool.push(coin);
     }
 }
