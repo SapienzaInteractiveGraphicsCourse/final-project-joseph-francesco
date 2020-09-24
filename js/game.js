@@ -311,7 +311,7 @@ export default class Game {
             
             o.mesh.position.x = Math.cos(a*i)*h
             o.mesh.position.y = Math.sin(a*i)*h 
-            o.mesh.position.z = 250-(Math.random()*500+1)
+            o.mesh.position.z = 200-(Math.random()*400+1)
             o.mesh.rotation.z = a*i-Math.PI/2
             o.move()
             arr.push(o)
