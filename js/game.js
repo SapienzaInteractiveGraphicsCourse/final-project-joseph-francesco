@@ -209,6 +209,7 @@ export default class Game {
 
     play() {
         if (this.yoshi.yoshi.isJumping) return
+        
         if (this.game.status == 'playing') return
         
         else if (this.game.status == 'init') {
@@ -223,7 +224,7 @@ export default class Game {
             this.renderer.setClearColor(Colors.blue, 1)
         }
         
-        else if (this.game.status == 'waiting') this.reset()
+        else if (this.game.status == 'gameover') this.reset()
         
         this.yoshi.playPose()
         
@@ -238,11 +239,11 @@ export default class Game {
         }, 2400)
         this.gameAudio.play()
         
-        this.spawnEggs()
-        this.spawnCoins()
-        this.spawnGoombas()
-        this.spawnMushrooms()
-        this.spawnBlocks()
+        this.spawnEggs(this.game.nEggs)
+        this.spawnCoins(this.game.nCoins)
+        this.spawnGoombas(this.game.nGoombas)
+        this.spawnMushrooms(this.game.nMushrooms)
+        this.spawnBlocks(this.game.nBlocks)
     }
 
     reset() {
@@ -257,46 +258,63 @@ export default class Game {
         this.yoshi.mesh.position.z = 0
     }
     
-    spawnCoins() {    
-        for (var i = 0; i < this.game.nCoins; i++) {
-            this.game.coinsArray.push(new Coin(this.coinMesh.clone()))
-        } this.randomGenerator(this.game.coinsArray, this.game.nCoins, 'Coins')
+    spawnCoins(n) {    
+        this.randomGenerator(this.game.coinsArray, n, 'Coins')
     } 
 
-    spawnEggs() {
-        for (var i = 0; i < this.game.nEggs; i++) {
-            this.game.eggsArray.push(new Egg(this.eggMesh.clone()))
-        } this.randomGenerator(this.game.eggsArray, this.game.nEggs, 'Eggs')
+    spawnEggs(n) {
+        this.randomGenerator(this.game.eggsArray, n, 'Eggs')
     }
 
-    spawnMushrooms() {
-        for (var i = 0; i < this.game.nMushrooms; i++) {
-            this.game.mushroomsArray.push(new Mushroom(this.mushroomMesh.clone()))
-        } this.randomGenerator(this.game.mushroomsArray, this.game.nMushrooms, 'Mushroom')
+    spawnMushrooms(n) {
+        this.randomGenerator(this.game.mushroomsArray, n, 'Mushrooms')
     }
 
-    spawnGoombas() {
-        for (var i = 0; i < this.game.nGoombas; i++) {
-            this.game.goombasArray.push(new Goomba(this.goombaMesh.clone()))
-        } this.randomGenerator(this.game.goombasArray, this.game.nGoombas, 'Goombas')
+    spawnGoombas(n) {
+        this.randomGenerator(this.game.goombasArray, n, 'Goombas')
     }
 
-    spawnBlocks() {
-        for (var i = 0; i < this.game.nBlocks; i++) {
-            this.game.blocksArray.push(new Block(this.blockMesh.clone()))
-        } this.randomGenerator(this.game.blocksArray, this.game.nBlocks, 'Blocks')
+    spawnBlocks(n) {
+        this.randomGenerator(this.game.blocksArray, n, 'Blocks')
     }
 
-    randomGenerator(arr, n) {
-        var a = Math.PI*2/n
+    randomGenerator(arr, n, object) {
+        var a = Math.PI*2/n + 5-Math.random()*10+1
         var h = this.game.fieldRadius + 10
+        
         for (var i = 0; i < n; i++) {
-            var o = arr[i]
+            var o;
+            switch (object) {
+                case 'Coins':
+                    o = new Coin(this.coinMesh.clone())
+                    break
+
+                case 'Eggs':
+                    o = new Egg(this.eggMesh.clone())
+                    break
+
+                case 'Mushrooms':
+                    o = new Mushroom(this.mushroomMesh.clone())
+                    break;
+
+                case 'Goombas':
+                    o = new Goomba(this.goombaMesh.clone())
+                    break
+
+                case 'Blocks':
+                    o = new Block(this.blockMesh.clone())
+                    break
+            
+                default:
+                    break
+            }
+            
             o.mesh.position.x = Math.cos(a*i)*h
             o.mesh.position.y = Math.sin(a*i)*h 
             o.mesh.position.z = 100-Math.random()*200
             o.mesh.rotation.z = a*i-Math.PI/2
             o.move()
+            arr.push(o)
             this.game.collidableArray.push(o.mesh)
             this.enemyMesh.add(o.mesh)
         }
@@ -333,10 +351,10 @@ export default class Game {
             this.game.speed += this.game.targetSpeed
             this.game.yoshiSpeed += this.game.speed*this.game.ratioYoshiSpeed
             
-            if (!this.maxRotation && this.game.speed > this.game.maxRotationSpeed) 
-                this.maxRotation = true
+            if (!this.game.maxRotation && this.game.speed > this.game.maxRotationSpeed) 
+                this.game.maxRotation = true
 
-            if (this.maxRotation) this.game.rotationSpeed -= this.game.maxRotationSpeed*Math.PI/180*this.game.ratioRotationSpeed
+            if (this.game.maxRotation) this.game.rotationSpeed -= this.game.maxRotationSpeed*Math.PI/180*this.game.ratioRotationSpeed
             else this.game.rotationSpeed -= this.game.speed*Math.PI/180*this.game.ratioRotationSpeed
         }
     }
@@ -431,33 +449,32 @@ export default class Game {
             // Add energy
             if (this.game.coinsArray.length < this.game.minCoins && !this.game.coinSpawn) {
                 this.game.coinSpawn = true
-                console.log('spawnCoins')
-                this.spawnCoins()
+                this.spawnCoins(10)
                 this.game.coinSpawn = false
             }
 
             if (this.game.eggsArray.length < this.game.minEggs && !this.game.eggSpawn) {
                 this.game.eggSpawn = true
-                this.spawnEggs()
+                this.spawnEggs(5)
                 this.game.eggSpawn = false
             }
 
             if (this.game.mushroomsArray.length < this.game.minMushrooms && !this.game.mushroomSpawn) {
                 this.game.mushroomSpawn = true
-                this.spawnMushrooms()
+                this.spawnMushrooms(2)
                 this.game.mushroomSpawn = false
             }
 
             // Add enemies
             if (this.game.goombasArray.length < this.game.minGommbas && !this.game.goombasSpawn) {
                 this.game.goombasSpawn = true
-                this.spawnGoombas()
+                this.spawnGoombas(10)
                 this.game.goombasSpawn = false
             }
 
             if (this.game.blocksArray.length < this.game.minBlocks && !this.game.blockSpawn) {
                 this.game.blockSpawn = true
-                this.spawnBlocks()
+                this.spawnBlocks(5)
                 this.game.blockSpawn = false
             }
 
@@ -487,7 +504,6 @@ export default class Game {
                 console.log('Game over!')
                 this.title.innerHTML = 'GAME OVER'
                 this.subtitle.innerHTML = 'Press Start to Play Again'
-                this.game.status = 'waiting'
             })
         }
     }

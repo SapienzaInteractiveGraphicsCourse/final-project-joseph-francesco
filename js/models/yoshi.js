@@ -21,7 +21,7 @@ export default class Yoshi {
         radius:0
     }
 
-    constructor(scene) {
+    constructor() {
 
         this.yoshiTweens = new TWEEN.Group()
         this.playingTweens = new TWEEN.Group()
@@ -37,11 +37,9 @@ export default class Yoshi {
         this.yoshiAudio.volume = 0.5
         this.cryAudio.volume = 0.5
         this.bigAudio.volume = 0.1
-
-        this.load(scene)
     }
 
-    async load(scene) {
+    async load(scene, callback) {
         var loader = new GLTFLoader()
         loader.load('./models/yoshi/scene.gltf', object => {
             this.mesh = new THREE.Mesh(
@@ -51,6 +49,7 @@ export default class Yoshi {
             this.mesh.name = 'Yoshi'
             this.init()
             scene.add(this.mesh)
+            callback()
         }, null, null)
     }
 

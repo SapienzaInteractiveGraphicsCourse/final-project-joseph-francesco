@@ -141,6 +141,16 @@
     white-space: nowrap;
 }
 
+#loading {
+    background: url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fqz.com%2Fwp-content%2Fuploads%2F2016%2F09%2Floading.gif%3Fw%3D2800&f=1&nofb=1') no-repeat center center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 9999999;
+}
+
 @-webkit-keyframes blinking {
     0% { opacity: 1; }
     50% { opacity: 0; }
