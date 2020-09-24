@@ -99,12 +99,12 @@ export default class Game {
 
         yoshi.yoshi.radius = this.game.yPosition
         
-        this.gameAudio = new Audio('./assets/yoshi_circuit.mp3')
-        this.coinAudio = new Audio('./models/coin/sounds/catch.mp3')
-        this.ouchAudio = new Audio('./models/goomba/sounds/ouch.mp3')
-        this.eggAudio = new Audio('./models/egg/sounds/eat.mp3')
-        this.destroyBlockAudio = new Audio('./models/block/sounds/destroy.mp3')
-        this.smashGoombaAudio = new Audio('./models/goomba/sounds/destroy.mp3')
+        this.gameAudio = new Audio('../assets/yoshi_circuit.mp3')
+        this.coinAudio = new Audio('../models/coin/sounds/catch.mp3')
+        this.ouchAudio = new Audio('../models/goomba/sounds/ouch.mp3')
+        this.eggAudio = new Audio('../models/egg/sounds/eat.mp3')
+        this.destroyBlockAudio = new Audio('../models/block/sounds/destroy.mp3')
+        this.smashGoombaAudio = new Audio('../models/goomba/sounds/destroy.mp3')
         
         this.coinAudio.volume = 0.3
         this.ouchAudio.volume = 0.5
