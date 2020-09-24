@@ -151,6 +151,17 @@
     z-index: 9999999;
 }
 
+.credit {
+    position: absolute;
+    font-family: "Playfair Display";
+    font-weight: bold;
+    font-size: 0.9em;
+    bottom: 1vh;
+    left: 3vh;
+    letter-spacing: 0.15em;
+    color: white;
+}
+
 @-webkit-keyframes blinking {
     0% { opacity: 1; }
     50% { opacity: 0; }
