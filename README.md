@@ -17,7 +17,7 @@ The game is a "non-stop running" gameplay kind, in which the objective is to rid
 ## Characters
 - **Coins**: Raise the energy
 - **Eggs**: Raise the energy
-- **Mushrooms**: Yoshi graws and it is able to destroy enemies. 
+- **Mushrooms**: Yoshi graws and can destroy enemies
 - **Goombas**: Moving enemies
 - **Brick Blocks**: Still obstacles
 
