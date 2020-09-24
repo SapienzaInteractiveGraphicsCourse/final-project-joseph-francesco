@@ -21,7 +21,7 @@ class GameSettings {
         
         distance:0,
         ratioSpeedDistance:.25,
-        energy:10,
+        energy:100,
         ratioSpeedEnergy:.01,
 
         level:1,
@@ -85,6 +85,10 @@ export default class Game {
     fieldLevel = document.getElementById("levelValue")
     fieldEnergy = document.getElementById("energyValue")
     instruction = document.getElementById('instructions')
+    keys = document.getElementById('keys')
+    leftKey = document.getElementById('leftKey')
+    rightKey = document.getElementById('rightKey')
+    spaceKey = document.getElementById('spaceKey')
 
     constructor(scene, camera, renderer, yoshi) {
     
@@ -133,10 +137,42 @@ export default class Game {
                         console.log(this.scene)    
                         console.log(this.game)
                         console.log(this.yoshi)
+
+                    case 'ArrowRight':
+                        this.rightKey.style.transform = "translateY(3px)"
+                        break
+                    
+                    case 'ArrowLeft':
+                        this.leftKey.style.transform = "translateY(3px)"
+                        break
+
+                    case ' ':
+                        this.spaceKey.style.transform = "translateY(3px)"
+                        break
+
                     default:
                         break
                 }
             }, false)
+
+            document.addEventListener("keyup", (event) => {
+                switch (event.key) {
+                    case 'ArrowRight':
+                        this.rightKey.style.transform = "translateY(0px)"
+                        break
+                    
+                    case 'ArrowLeft':
+                        this.leftKey.style.transform = "translateY(0px)"
+                        break
+
+                    case ' ':
+                        this.spaceKey.style.transform = "translateY(0px)";
+                        break
+    
+                    default:
+                        break
+                }
+            })
         })
     }
 
@@ -178,23 +214,30 @@ export default class Game {
         else if (this.game.status == 'init') {
             
             this.scene.background = null
-            this.camera.position.set(this.game.cameraOffsetX, this.game.fieldRadius + 67.42, 0)
             this.scene.add(this.globalMesh)
-            
             this.instruction.style.display = 'none'
             this.level.style.visibility = 'visible'
             this.distance.style.visibility = 'visible'
             this.energy.style.visibility = 'visible'
+            this.keys.style.visibility = 'visible'
             this.renderer.setClearColor(Colors.blue, 1)
         }
         
         else if (this.game.status == 'waiting') this.reset()
         
+        this.yoshi.playPose()
+        
+        this.camera.position.set(100, 600, -600)
+        new TWEEN.Tween(this.camera.position).to({x: this.game.cameraOffsetX, y: this.game.fieldRadius + 67.42, z: 0}, 3000)
+            .onUpdate(() => {
+                this.camera.lookAt(this.yoshi.mesh.position)
+            })
+            .start()
         this.yoshi.play(() => {
             this.game.status = 'playing'
-            this.gameAudio.play()
-        })
-        this.camera.lookAt(this.yoshi.mesh.position)
+        }, 2400)
+        this.gameAudio.play()
+        
         this.spawnEggs()
         this.spawnCoins()
         this.spawnGoombas()
@@ -300,7 +343,7 @@ export default class Game {
 
     collisionDetection() {
         var originPoint = this.yoshi.mesh.position.clone();
-        
+        if (this.yoshi.yoshi.isJumping) return
         for (var i = 0; i < this.yoshi.mesh.geometry.vertices.length; i++) {
             
             var localVertex = this.yoshi.mesh.geometry.vertices[i].clone()
@@ -388,6 +431,7 @@ export default class Game {
             // Add energy
             if (this.game.coinsArray.length < this.game.minCoins && !this.game.coinSpawn) {
                 this.game.coinSpawn = true
+                console.log('spawnCoins')
                 this.spawnCoins()
                 this.game.coinSpawn = false
             }
