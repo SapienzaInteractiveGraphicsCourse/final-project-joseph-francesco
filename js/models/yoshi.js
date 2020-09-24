@@ -1,4 +1,5 @@
-import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js'
+import {GLTFLoader} from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js'
+
 export default class Yoshi {
 
     yoshi = {

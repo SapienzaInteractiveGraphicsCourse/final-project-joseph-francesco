@@ -1,4 +1,4 @@
-import {Coin, Egg, Mushroom, Goomba, Block, Cloud, Colors} from '/js/models/objects.js'
+import {Coin, Egg, Mushroom, Goomba, Block, Cloud, Colors} from './js/models/objects.js'
 
 class GameSettings {
 
