@@ -1,4 +1,4 @@
-import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js'
+import {GLTFLoader} from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js'
 
 export var Colors = {
 	white:0xd8d0d1,
