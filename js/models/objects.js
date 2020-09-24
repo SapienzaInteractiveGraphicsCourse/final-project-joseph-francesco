@@ -31,7 +31,7 @@ export class Coin {
     static async load() {
         var loader = new GLTFLoader()
         return new Promise((resolve, reject) => {
-            loader.load('../models/coin/scene.gltf', object => {
+            loader.load('./models/coin/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(0.05, 0.05, 0.05)
                 mesh.position.y = -5
@@ -70,7 +70,7 @@ export class Egg {
     static async load() {
         var loader = new GLTFLoader()
         return new Promise((resolve, reject) => {
-            loader.load('../models/egg/scene.gltf', object => {
+            loader.load('./models/egg/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(5, 5, 5)
                 mesh.position.y -= 2
@@ -117,7 +117,7 @@ export class Goomba {
     static async load() {
         var loader = new GLTFLoader()
         return new Promise((resolve, reject) => {
-            loader.load('../models/goomba/scene.gltf', object => {
+            loader.load('./models/goomba/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(0.06, 0.06, 0.06)
                 mesh.rotation.y += Math.PI/2
@@ -154,7 +154,7 @@ export class Mushroom {
     static async load() {
         var loader = new GLTFLoader()
         return new Promise((resolve, reject) => {
-            loader.load('../models/mushroom/scene.gltf', object => {
+            loader.load('./models/mushroom/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(5, 5, 5)
                 mesh.position.y = -5
@@ -184,7 +184,7 @@ export class Block {
     static async load() {
         var loader = new GLTFLoader()
         return new Promise((resolve, reject) => {
-            loader.load('../models/block/scene.gltf', object => {
+            loader.load('./models/block/scene.gltf', object => {
                 var mesh = object.scene
                 mesh.scale.set(0.15, 0.15, 0.15)
                 mesh.position.y -=10
