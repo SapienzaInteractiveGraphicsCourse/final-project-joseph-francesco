@@ -27,11 +27,11 @@ export default class Yoshi {
         this.playingTweens = new TWEEN.Group()
         this.runningTweens = new TWEEN.Group()
         
-        this.jumpAudio1 = new Audio('/models/yoshi/sounds/jump1.mp3')
-        this.jumpAudio2 = new Audio('/models/yoshi/sounds/jump2.mp3')
-        this.yoshiAudio = new Audio('/models/yoshi/sounds/yoshi.mp3')
-        this.cryAudio = new Audio('/models/yoshi/sounds/lose.mp3')
-        this.bigAudio = new Audio('/models/yoshi/sounds/big.mp3')
+        this.jumpAudio1 = new Audio('./models/yoshi/sounds/jump1.mp3')
+        this.jumpAudio2 = new Audio('./models/yoshi/sounds/jump2.mp3')
+        this.yoshiAudio = new Audio('./models/yoshi/sounds/yoshi.mp3')
+        this.cryAudio = new Audio('./models/yoshi/sounds/lose.mp3')
+        this.bigAudio = new Audio('./models/yoshi/sounds/big.mp3')
         this.jumpAudio1.volume = 0.5
         this.jumpAudio2.volume = 0.5
         this.yoshiAudio.volume = 0.5
@@ -43,7 +43,7 @@ export default class Yoshi {
 
     async load(scene) {
         var loader = new GLTFLoader()
-        loader.load('/models/yoshi/scene.gltf', object => {
+        loader.load('./models/yoshi/scene.gltf', object => {
             this.mesh = new THREE.Mesh(
                 new THREE.CubeGeometry(20, 30, 15),
                 new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0})
