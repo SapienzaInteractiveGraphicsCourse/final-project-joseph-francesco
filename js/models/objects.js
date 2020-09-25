@@ -201,7 +201,7 @@ export class Cloud {
     constructor() {
         this.mesh = new THREE.Object3D()
         this.mesh.name = "Cloud"
-        var geom = new THREE.CubeGeometry(20, 20, 20)
+        var geom = new THREE.BoxGeometry(20, 20, 20)
         var mat = new THREE.MeshPhongMaterial({color: Colors.white})
 
         var nBlocs = 3 + Math.floor(Math.random() * 3)
@@ -215,8 +215,6 @@ export class Cloud {
             var s = .1 + Math.random() * .9
             m.scale.set(s, s, s)
             this.mesh.add(m)
-            m.castShadow = true
-            m.receiveShadow = true
         }
     }
 }
