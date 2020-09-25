@@ -196,7 +196,7 @@ export default class Game {
             var h = this.game.fieldRadius + 200
             c.mesh.position.y = Math.sin(a)*h
             c.mesh.position.x = Math.cos(a)*h
-            c.mesh.position.z = 200-Math.random()*500
+            c.mesh.position.z = 175-Math.random()*350
             c.mesh.rotation.z = a + Math.PI/2
             var s = 1 + Math.random()*2
             c.mesh.scale.set(s, s, s)

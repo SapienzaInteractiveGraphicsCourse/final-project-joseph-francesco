@@ -48,8 +48,9 @@
 			
 			var light = new THREE.AmbientLight(0x2f2f1f , 2);
 			scene.add(light);
-			var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-			directionalLight.position.set(0, 1, 0)
+
+			var directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+			directionalLight.position.set(0, 10, 0)
 			scene.add(directionalLight);
 			
 			var yoshi = new Yoshi();
