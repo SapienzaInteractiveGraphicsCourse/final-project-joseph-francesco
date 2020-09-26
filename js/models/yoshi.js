@@ -41,7 +41,7 @@ export default class Yoshi {
         var loader = new GLTFLoader()
         loader.load('./models/yoshi/scene.gltf', object => {
             this.mesh = new THREE.Mesh(
-                new THREE.CubeGeometry(20, 30, 15),
+                new THREE.BoxGeometry(20, 30, 15),
                 new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0})
             ).add(object.scene)
             this.mesh.name = 'Yoshi'
