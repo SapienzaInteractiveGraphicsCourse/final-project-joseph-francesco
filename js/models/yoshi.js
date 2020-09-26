@@ -12,8 +12,6 @@ export default class Yoshi {
 
         rightPressed:false,
         leftPressed:false,
-        upPressed:false,
-        downPressed:false,
         rightBound:-100,
         leftBound:100,
 
@@ -116,16 +114,6 @@ export default class Yoshi {
                         this.yoshi.leftPressed = true
                     break
 
-                case 'ArrowUp':
-                    if (this.yoshi.isPlaying && !this.yoshi.upPressed)
-                        this.yoshi.upPressed = true
-                    break
-
-                case 'ArrowDown':
-                    if (this.yoshi.isPlaying && !this.yoshi.downPressed)
-                        this.yoshi.downPressed = true
-                    break
-
                 default:
                     break
             }
@@ -140,13 +128,6 @@ export default class Yoshi {
                 case 'ArrowLeft':
                     if (this.yoshi.isPlaying) this.yoshi.leftPressed = false
                     break
-
-                case 'ArrowUp':
-                    if (this.yoshi.isPlaying) this.yoshi.upPressed = false
-                    break
-
-                case 'ArrowDown':
-                    if (this.yoshi.isPlaying) this.yoshi.downPressed = false
 
                 default:
                     break
@@ -309,8 +290,6 @@ export default class Yoshi {
         this.yoshi.isRunning = false
         this.yoshi.rightPressed = false
         this.yoshi.leftPressed = false
-        this.yoshi.upPressed = false
-        this.yoshi.downPressed = false
         this.stopRunning()
         this.pose()
 

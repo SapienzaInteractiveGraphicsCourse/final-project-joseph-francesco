@@ -279,7 +279,7 @@ export default class Game {
     }
 
     randomGenerator(arr, n, object) {
-        var a = Math.PI*2/n + 1-(Math.random()*2+1)
+        var a = Math.PI*2/n
         var h = this.game.fieldRadius + 10
         
         for (var i = 0; i < n; i++) {
@@ -311,7 +311,7 @@ export default class Game {
             
             o.mesh.position.x = Math.cos(a*i)*h
             o.mesh.position.y = Math.sin(a*i)*h 
-            o.mesh.position.z = 175-(Math.random()*350+1)
+            o.mesh.position.z = 125-(Math.random()*250+1)
             o.mesh.rotation.z = a*i-Math.PI/2
             o.move()
             arr.push(o)
