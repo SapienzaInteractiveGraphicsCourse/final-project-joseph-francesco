@@ -12,8 +12,8 @@ export default class Yoshi {
 
         rightPressed:false,
         leftPressed:false,
-        rightBound:-100,
-        leftBound:100,
+        rightBound:-110,
+        leftBound:110,
 
         delta:1.5,
         radius:0
