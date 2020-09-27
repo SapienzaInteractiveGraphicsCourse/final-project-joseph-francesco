@@ -137,6 +137,7 @@ export default class Game {
                         console.log(this.scene)    
                         console.log(this.game)
                         console.log(this.yoshi)
+                        break
 
                     case 'ArrowRight':
                         this.rightKey.style.transform = "translateY(3px)"
@@ -210,10 +211,11 @@ export default class Game {
     play() {
         if (this.yoshi.yoshi.isJumping) return
         
-        if (this.game.status == 'playing') return
+        if (this.game.status == 'playing' || this.game.status == 'busy') return
         
         else if (this.game.status == 'init') {
-            
+
+            this.game.status = 'busy'
             this.scene.background = null
             this.scene.add(this.globalMesh)
             this.instruction.style.display = 'none'
@@ -247,14 +249,15 @@ export default class Game {
     }
 
     reset() {
-        this.enemyMesh.children.length = 0
-        this.globalMesh.rotation.z = 0
         this.game = new GameSettings().settings
+        this.game.status = 'busy'
         this.fieldEnergy.innerHTML = this.game.energy
         this.fieldLevel.innerHTML = this.game.level
         this.fieldDistance.innerHTML = this.game.distance
         this.title.innerHTML = this.game.title
         this.subtitle.innerHTML = this.game.subtitle
+        this.enemyMesh.children.length = 0
+        this.globalMesh.rotation.z = 0
         this.yoshi.mesh.position.z = 0
     }
     
