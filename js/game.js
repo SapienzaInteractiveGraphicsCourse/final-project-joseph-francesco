@@ -133,7 +133,7 @@ export default class Game {
                     case 'Enter':
                         this.play()
                         break
-                    case 'p':
+                    case 'p': // DEBUG
                         console.log(this.scene)    
                         console.log(this.game)
                         console.log(this.yoshi)
@@ -224,7 +224,7 @@ export default class Game {
             this.renderer.setClearColor(Colors.blue, 1)
         }
         
-        else if (this.game.status == 'gameover') this.reset()
+        else if (this.game.status == 'waiting') this.reset()
         
         this.yoshi.playPose()
         
@@ -505,6 +505,8 @@ export default class Game {
                 this.title.innerHTML = 'GAME OVER'
                 this.subtitle.innerHTML = 'Press Start to Play Again'
             })
+
+            this.game.status = 'waiting'
         }
     }
 }
