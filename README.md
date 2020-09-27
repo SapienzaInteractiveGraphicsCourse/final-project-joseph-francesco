@@ -27,3 +27,4 @@ The game is a "non-stop running" gameplay kind, in which the objective is to rid
 - Tween.js
 
 ## [Live DEMO](https://sapienzainteractivegraphicscourse.github.io/final-project-joseph-francesco/)
+## [Documentation](https://drive.google.com/file/d/1_5uOClQXg1rdKw3UqKVL1_sHaTUIVsE-/view?usp=sharing)
